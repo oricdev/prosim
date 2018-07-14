@@ -2,6 +2,11 @@
     width: 85px;
 }
 
+.title_banner {
+    text-align: left;
+    padding-left: 2em;
+}
+
 .pic_cell {
     width: 270px;
 }

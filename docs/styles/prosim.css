@@ -1,7 +1,11 @@
 .pic_banner {
-    width: 120px;
+    width: 180px;
 }
 
 .pic_cell {
     width: 300px;
+}
+
+.ico_parent {
+    width: 50px;
 }

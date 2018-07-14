@@ -66,6 +66,20 @@
 
             <p>&nbsp;</p>
 
+            <p style="color:red">to be reviewed</p>
+
+            <p>The overall process runs pretty good, and without any problem. There are 2 things which you have to care about:
+            <ul>
+            <li>the merging between the current data-package being processed and data already stored in the database (product codes may be common to both sets) is a heavy process:
+                it perfoms a kind of MapReduce operation between the 2 sets and merges both similarity percentages and nutrition-scores among possibly several hundreds or thousands of similar products.
+            The Mongo-engine performs also live-indexing for all these insertions. So be gentle with it. For this reason, you should limit the number of intersections computed to 15 millions for 1 data-package ({width, height} could be {5000, 3000}, {7500, 2000}) and the number of data-packages produced per half-an-hour limited to 20.
+            Keep in mind that for some data-sets of 15M intersections, only 1000 products may be updated in the database (with MapReduce), but it can also reach something like 15000 codes to update that way. In this latter case, the need of resources may reach summits and consumption limits of your provider may apply.</li>
+            <li>both preparer and intersecter processes use the same log file (unfortunately.. mea culpa). As long as it is not fixed, these 2 processes shouls avoid running simultaneously, even though no disturbance could be noticed when they did occasionnally.</li>
+        </ul>
+            </p>
+
+            <p></p>
+
             <p>INTERSECT: when the intersecter process finishes importing a data-package in the mongo database, it moves the data-package directory to the backup directory.</p>
             <p>As explained earlier, since the import process into the database is a heavy process in terms of resources being used, it may happen that the 3rd batch clearing the backup directory executes during the moving of the data-package.
                 The intersect process just raises an Exception and finishes without moving all the files held in the data-package. As a result, the next time it launches, it may be that only one of the 2 files required for the intersection process to succeed is missing. Hence the process just goes on terminating.</p>

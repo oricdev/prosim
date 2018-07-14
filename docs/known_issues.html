@@ -66,7 +66,12 @@
 
             <p>&nbsp;</p>
 
-
+            <p>INTERSECT: when the intersecter process finishes importing a data-package in the mongo database, it moves the data-package directory to the backup directory.</p>
+            <p>As explained earlier, since the import process into the database is a heavy process in terms of resources being used, it may happen that the 3rd batch clearing the backup directory executes during the moving of the data-package.
+                The intersect process just raises an Exception and finishes without moving all the files held in the data-package. As a result, the next time it launches, it may be that only one of the 2 files required for the intersection process to succeed is missing. Hence the process just goes on terminating.</p>
+                <p>Manual solution: so far, you just need to delete manually the data-package holding 1 single file instead of 2 (the other one was moved already to the backup-directory and deleted by the cleaning bach).</p>
+                <p>How to fix: make the intersect process delete the data-package instead of moving it!</p>
+            </p>
 
 
         </section>

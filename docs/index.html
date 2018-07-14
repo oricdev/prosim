@@ -71,7 +71,7 @@
                     <td>&nbsp;</td>
                     <td>
                         <a href="history_tuttifrutti.html" title="prehistory: ante-prosim" target="_blank">
-                            <h3>ante-Prosim: the tuttifrutti website (proof-of-concept)</h3>
+                            <h3>ante-Prosim: the tuttifrutti website</h3>
                         </a>
                     </td>
                 </tr>
@@ -83,7 +83,7 @@
                     </td>
                     <td>&nbsp;</td>
                     <td>
-                        <a href="history_pros_cons.html" title="pros and cons" target="_blank">
+                        <a href="history_pros_and_cons.html" title="pros and cons" target="_blank">
                             <h3>pros and cons</h3>
                         </a>
                     </td>
@@ -102,43 +102,6 @@
                     </td>
                 </tr>
             </table>
-
-
-            <h4 id="up-and-running--but-slow">up and running … but slow</h4>
-            <p>The <a href="http://tuttifrutti.alwaysdata.net/">tuttifrutti</a> is up and running, with no scanning but by entering the barcode so far.</p>
-
-            <p>It makes use of the official OFF-database which requires to compute live similar products
-                (roughly based on products’ attributes <em>categories_tags</em> and <em>nutrition_score_uk</em>). The computation of similarities
-                is much too long and may take up to 25 seconds for a single request.</p>
-
-            <h4 id="serving-my-needs-and-thats-all-folk">serving my needs… and that’s all folk!</h4>
-            <p>Hey, what did you expect :) ?</p>
-
-            <p>As you may have noticed in the second example provided in section <em>ante-prosim</em>, the server is kind enough to deliver (x, y) points for positioning the points in the
-                3D.js graph. This is great but not required for all possible needs. Furthermore, this coordinates computation could also be performed on the client-side.</p>
-
-            <h4 id="based-on-my-own-definition-of-good-and-similar">based on my own definition of good and similar</h4>
-            <p>What is meant with</p>
-            <ul>
-                <li>a better product ?</li>
-                <li>a similar product ?</li>
-            </ul>
-
-            <p>Well, as far as I am concerned, and after having looked at the information stored in the OFF-database, I consider that:</p>
-            <ul>
-                <li>product B is better than product A if the nutrition score of B is better (based on tag <em>nutrition_score_uk</em>)</li>
-                <li>similarity of product B with product A : the higher the number of common categories between A and B divided by the number of categories of A, the better!</li>
-            </ul>
-
-            <p>I’m Okay with that! i just need to know about it! It’s like computing the probability of occurrence of event B knowing A or its contrary. It’s not very intuitive but it’s not wrong :).</p>
-
-            <p>circles computed on server , not optimal
-                too many computations live on server, not good for a server
-                too close to the application, would be better to query/respond immediately</p>
-
-            <p>discussion: what is better product, what is similar, discussion off…
-                =&gt; this engine</p>
-
 
 
 

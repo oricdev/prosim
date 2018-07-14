@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/prosim/assets/css/style.css?v=b9ec3ca7a3002b3d2a715590618f77242f882e00" media="screen" type="text/css">
+    <link rel="stylesheet" href="/prosim/assets/css/print.css" media="print" type="text/css">
+    <!-- my own styles -->
+    <link rel="stylesheet" href="./styles/prosim.css" media="screen" type="text/css">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Begin Jekyll SEO tag v2.5.0 -->
+    <title>prosim | backend bone for computing similarities between OpenFoodFacts products</title>
+    <meta name="generator" content="Jekyll v3.7.3" />
+    <meta property="og:title" content="prosim" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="description" content="backend bone for computing similarities between OpenFoodFacts products" />
+    <meta property="og:description" content="backend bone for computing similarities between OpenFoodFacts products" />
+    <link rel="canonical" href="https://oricdev.github.io/prosim/" />
+    <meta property="og:url" content="https://oricdev.github.io/prosim/" />
+    <meta property="og:site_name" content="prosim" />
+    <script type="application/ld+json">
+{"name":"prosim","description":"backend bone for computing similarities between OpenFoodFacts products","@type":"WebSite","url":"https://oricdev.github.io/prosim/","headline":"prosim","@context":"http://schema.org"}</script>
+    <!-- End Jekyll SEO tag -->
+
+</head>
+
+<body>
+<header>
+    <div class="inner">
+        <a href="https://oricdev.github.io/prosim/">
+            <h1>prosim</h1>
+        </a>
+        <h2>backend bone for computing similarities between OpenFoodFacts products</h2>
+
+        <a href="https://github.com/oricdev/prosim" class="button"><small>View project on</small> GitHub</a>
+
+
+    </div>
+</header>
+
+<div id="content-wrapper">
+    <div class="inner clearfix">
+        <section id="main-content">
+
+            <!-- link to parent page -->
+            <a href="index.html">
+                <img src="images/go_parent.jpeg" class="ico_parent" title="go back to parent page" alt="go back to parent page" />
+            </a>
+
+            <table>
+                <tr>
+                    <td>
+                        <img src="./images/pros_cons.jpg" title="pros and cons" class="pic_banner" />
+                    </td>
+                    <td>&nbsp;</td>
+                    <td>
+                        <h3>pros &amp; cons</h3>
+                    </td>
+                </tr>
+            </table>
+
+            <p>&nbsp;</p>
+
+            <h2 id="up-and-running--but-slow">up and running … but slow</h2>
+            <p>The <a href="http://tuttifrutti.alwaysdata.net/">tuttifrutti</a> is up and running, with no scanning but by entering the barcode so far.</p>
+
+            <p>It makes use of the official OFF-database which requires to compute live similar products
+                (roughly based on products’ attributes <em>categories_tags</em> and <em>nutrition_score_uk</em>). The computation of similarities
+                is much too long and may take up to 25 seconds for a single request.</p>
+
+            <h2 id="serving-my-needs-and-thats-all-folk">serving my needs… and that’s all folk!</h2>
+            <p>Hey, what did you expect :) ?</p>
+
+            <p>As you may have noticed in the second example provided in section <em>ante-prosim</em>, the server is kind enough to deliver (x, y) points for positioning the points in the
+                3D.js graph. This is great but not required for all possible needs. Furthermore, this coordinates computation could also be performed on the client-side.</p>
+
+            <h2 id="based-on-my-own-definition-of-good-and-similar">based on my own definition of good and similar</h2>
+            <p>What is meant with</p>
+            <ul>
+                <li>a better product ?</li>
+                <li>a similar product ?</li>
+            </ul>
+
+            <p>Well, as far as I am concerned, and after having looked at the information stored in the OFF-database, I consider that:</p>
+            <ul>
+                <li>product B is better than product A if the nutrition score of B is better (based on tag <em>nutrition_score_uk</em>)</li>
+                <li>similarity of product B with product A : the higher the number of common categories between A and B divided by the number of categories of A, the better!</li>
+            </ul>
+
+            <p>I’m Okay with that! i just need to know about it! It’s like computing the probability of occurrence of event B knowing A or its contrary. It’s not very intuitive but it’s not wrong :).</p>
+
+            <p>circles computed on server , not optimal
+                too many computations live on server, not good for a server
+                too close to the application, would be better to query/respond immediately</p>
+
+            <p>discussion: what is better product, what is similar, discussion off…
+                =&gt; this engine</p>
+
+
+
+
+        </section>
+
+        <aside id="sidebar">
+
+
+
+            <p class="repo-owner"><a href="https://github.com/oricdev/prosim">prosim</a> is maintained by <a href="https://github.com/oricdev">oricdev</a>.</p>
+
+
+            <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</p>
+        </aside>
+    </div>
+</div>
+
+
+</body>
+</html>

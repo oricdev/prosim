@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <path_to_root>../../..</path_to_root>
+    <!-- Max number of data packages allowed in the output directory. If less, then the preparer task is allowed to produce new data packages/work-units -->
+    <max_output_data>20</max_output_data>
+    <out_path_preparer>/outputs/preparer</out_path_preparer>
+    <out_path_feeders>/outputs/feeders</out_path_feeders>
+    <out_all_products>all_products.json</out_all_products>
+    <out_updated_products>updated_products.json</out_updated_products>
+    <!-- statistics about overall progression of producing data packages/import process into mongo-Db -->
+    <out_path_stats>/stats/stats_progress.xml</out_path_stats>
+        
+    <!-- width and height of products' matrix in a single data-package/work-unit -->
+    <width>7500</width>
+    <height>2000</height>
+    <!-- Statistics purposes: number of products in width and height to import in Mongo db -->
+    <!-- Helps maintaining statistics on overall progression (check logs) -->
+    <stats_H_nb_products>554161</stats_H_nb_products>
+    <stats_W_nb_products>554161</stats_W_nb_products>
+</config>

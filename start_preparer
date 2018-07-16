@@ -1,0 +1,2 @@
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java -cp target/preparer_netbeans-1.0-SNAPSHOT-jar-with-dependencies.jar org.openfoodfacts.preparer/Main
+

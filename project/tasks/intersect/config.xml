@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <!-- Max. Db size allowed in Giga Bytes (decimal allowed such as 0.4 for instance) -->
+    <max_db_size_gigabytes>35</max_db_size_gigabytes>
+    <!-- Update this value and re-import from the beginning if you change this value! -->
+    <similarity_min_percentage>60</similarity_min_percentage>
+    <!-- Import modes into Mongo-Db: QUICK_INIT or FULL_CHECK_UPDATE (only QUICK_INIT available in current version when building the db from scratch! FULL_CHECK_UPDATE is foreseen for updating the database with deltas thereafter) -->
+    <!-- refer to documentation for further information -->
+    <mongo_import_mode>QUICK_INIT</mongo_import_mode>
+    <path_to_root>../..</path_to_root>
+    <!-- stop intersect-process when the number of data-packages in incoming directory is equal to this number -->
+    <stop_when_min_data_reached>3</stop_when_min_data_reached>
+    <path_to_incoming_data>outputs/preparer/</path_to_incoming_data>
+    <backup_dirname>backup</backup_dirname>
+    <!-- OFF remote db with matching products -->
+    <!--off_dest_host>mongodb-tuttifrutti.alwaysdata.net</off_dest_host>
+    <off_dest_port></off_dest_port>
+    <off_dest_db_name>tuttifrutti_off_match</off_dest_db_name>
+    <off_dest_login></off_dest_login>
+    <off_dest_pwd></off_dest_pwd--> 
+    
+    <!-- localhost -->
+    <off_dest_host>127.0.0.1</off_dest_host>
+    <off_dest_port>27017</off_dest_port>
+    <off_dest_db_name>off_match</off_dest_db_name>
+    <off_dest_login></off_dest_login>
+    <off_dest_pwd></off_dest_pwd>
+</config>

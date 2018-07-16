@@ -45,6 +45,15 @@ Feeders **should be scheduled** in the future **but are actually not** since *fe
 ### /tasks/preparer
 Note: check /tasks/preparer/preparer_netbeans/config.xml file
 
+**VERY IMPORTANT**: the progression of the generation of sub-matrixes by the preparer task is saved in */tasks/preparer/preparer/netbeans/progress.xml*.
+
+ The preparer job **stores the barcodes of the last intersected products** in there!! For a **new db**, there should not be any product code and you should have this:
+ 
+> \<last_intersect_code_all_products\>\</last_intersect_code_all_products\>
+> \<last_intersect_code_to_be_inserted\>\</last_intersect_code_to_be_inserted\>
+  
+Reset this file with empty tags if you wish to restart the import process from scratch (don't forget to drop your Prosim-db as well!).
+
 The *preparer* task deletes all lock-files when feeder_1 and feeder_2 extractions' are all processed/sliced
  up in data-packages (*/outputs/preparer*) in order to enable further extractions (from feeders tasks).
  Based on the huge matrix **\[all_products.json; updated_products.json\]**, it creates 

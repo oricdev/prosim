@@ -85,6 +85,12 @@ This tasks should be scheduled (see crontab below).
 
 
 ## Follow these steps to start with the Prosim project
+
+Update in *tasks/preparer/preparer_netbeans/src/main/resources/log4j.properties* the entry *log4j.eppender.file.File* with appropriate path for the log's outputs:
+
+> log4j.appender.file.File=~/prosim/project/logs/log_preparer.log
+
+
 Update the following tags in *global_config.xml* for accessing your official OFF database 
 (Mongo server should be started):
 > <off_source_host>127.0.0.1</off_source_host>

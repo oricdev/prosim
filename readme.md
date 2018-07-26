@@ -99,6 +99,9 @@ Update in *tasks/preparer/preparer_netbeans/src/main/resources/log4j.properties*
 
 > log4j.appender.file.File=~/prosim/project/logs/log_preparer.log
 
+Update in *tasks/intersect/src/main/resources/log4j.properties* the entry *log4j.eppender.file.File* with appropriate path for the log's outputs:
+
+> log4j.appender.file.File=~/prosim/project/logs/log_intersect.log
 
 Update the following tags in *global_config.xml* for accessing your official OFF database 
 (Mongo server should be started):

@@ -5,8 +5,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import org.apache.log4j.Appender;
+import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
+import org.apache.log4j.RollingFileAppender;
 import org.openfoodfacts.aggregator.ProductAggregator;
 import org.openfoodfacts.entities.Prosim;
 import org.openfoodfacts.mongo.MongoMgr;
@@ -39,6 +43,7 @@ public class Main {
     final static String CONF_MONGO_IMPORT_MODE = "mongo_import_mode";
     final static String CONF_STOP_WHEN_MIN_DATA_REACHED = "stop_when_min_data_reached";
     final static String CONF_PATH_TO_ROOT = "path_to_root";
+    final static String CONF_PATH_LOGFILE_NAME = "path_to_logfile_name";
     final static String CONF_PATH_INCOMING_DATA = "path_to_incoming_data";
     final static String CONF_PATH_RESULTS = "path_absolute_output_results";
     final static String CONF_BACKUP_DIRNAME = "backup_dirname";
@@ -49,6 +54,12 @@ public class Main {
     final static String CONF_OFF_DEST_DBNAME = "off_dest_db_name";
 
     public static void main(String[] args) {
+        // init log file: NOT WORKING with relative path?
+        /* FileAppender f_appender = (FileAppender)Logger.getRootLogger().getAppender("file");
+        String fname_log = CfgMgr.getConf(CONF_PATH_TO_ROOT).concat("/").concat(CfgMgr.getConf(CONF_PATH_LOGFILE_NAME));
+        f_appender.setFile(fname_log);
+        */
+        
         logger.info("Process Intersect started..");
         logger.info("Log level is " + logger.getParent().getLevel().toString().toUpperCase());
 

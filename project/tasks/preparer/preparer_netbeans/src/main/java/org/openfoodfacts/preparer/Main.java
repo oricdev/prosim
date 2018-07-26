@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.UUID;
+import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
 import org.openfoodfacts.products.IProduct;
 import org.openfoodfacts.utils.CfgMgr;
@@ -24,9 +25,10 @@ import org.openfoodfacts.utils.Tuple;
  */
 public class Main {
 
-    final static Logger logger = Logger.getLogger(Main.class);
+    final static Logger logger = Logger.getLogger(org.openfoodfacts.preparer.Main.class);
     // Tags in config.xml file
     final static String CONF_PATH_TO_ROOT = "path_to_root";
+    final static String CONF_PATH_LOGFILE_NAME = "path_to_logfile_name";
     final static String CONF_MAX_OUTPUT_DATA = "max_output_data";
     final static String CONF_STATS_HEIGHT = "stats_H_nb_products";
     final static String CONF_STATS_WIDTH = "stats_W_nb_products";
@@ -47,6 +49,12 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        // init log file: NOT WORKING with relative path?
+        /* FileAppender f_appender = (FileAppender)Logger.getRootLogger().getAppender("file");
+        String fname_log = CfgMgr.getConf(CONF_PATH_TO_ROOT).concat("/").concat(CfgMgr.getConf(CONF_PATH_LOGFILE_NAME));
+        f_appender.setFile(fname_log);
+        */
+        
         logger.info("Process Preparer started..");
         logger.info("Log level is " + logger.getParent().getLevel().toString().toUpperCase());
         // get available slots N on server => provide N new files

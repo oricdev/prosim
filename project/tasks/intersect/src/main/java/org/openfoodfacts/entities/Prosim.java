@@ -34,6 +34,7 @@ public class Prosim extends BaseEntity {
     private List<String> categories_tags;
     private List<String> stores_tags;
     private List<String> brands_tags;
+    private List<String> languages_codes;
     private LinkedTreeMap nutriments;
     private LinkedTreeMap images;
     private Float nutrition_score_uk;
@@ -51,6 +52,7 @@ public class Prosim extends BaseEntity {
         this.countries_tags = prodExt.getCountries_tags();
         this.stores_tags = prodExt.getStores_tags();
         this.brands_tags = prodExt.getBrands_tags();
+        this.languages_codes = prodExt.getLanguages_codes();
         this.nutriments = (LinkedTreeMap) prodExt.getNutriments();
         this.images = (LinkedTreeMap) prodExt.getImages();
         this.nutrition_score_uk = prodExt.getNutrition_score_uk();
@@ -92,6 +94,14 @@ public class Prosim extends BaseEntity {
 
     public void setCategories_tags(List<String> categories_tags) {
         this.categories_tags = categories_tags;
+    }
+    
+    public List<String> getLanguages_codes() {
+        return languages_codes;
+    }
+
+    public void setLanguages_codes(List<String> languages_codes) {
+        this.languages_codes = languages_codes;
     }
 
     public LinkedTreeMap getNutriments() {

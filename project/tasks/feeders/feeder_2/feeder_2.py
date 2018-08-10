@@ -107,6 +107,7 @@ fields_projection = {"_id": 1,
                      "nutriments": 1,
                      "brands_tags": 1,
                      "stores_tags": 1,
+                     "languages_codes": 1,
                      "images": 1}
 # .. retrieve all products
 cursor_upd_products = coll_products.find({}, fields_projection)

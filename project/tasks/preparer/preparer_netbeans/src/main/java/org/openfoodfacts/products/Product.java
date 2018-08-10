@@ -9,12 +9,13 @@ import java.util.List;
  */
 public class Product implements IProduct {
 
-    public Product(String _id, String code, String product_name, List<String> countries_tags, List<String> categories_tags, List<String> brands_tags, List<String> stores_tags, Object nutriments, Object images, Float nutrition_score_uk) {
+    public Product(String _id, String code, String product_name, List<String> countries_tags, List<String> categories_tags, List<String> brands_tags, List<String> languages_codes, List<String> stores_tags, Object nutriments, Object images, Float nutrition_score_uk) {
         this.code = code;
         this.product_name = product_name;
         this.countries_tags = countries_tags;
         this.categories_tags = categories_tags;
         this.brands_tags = brands_tags;
+        this.languages_codes = languages_codes;
         this.stores_tags = stores_tags;
         this.nutriments = nutriments;
         this.images = images;
@@ -27,6 +28,7 @@ public class Product implements IProduct {
     private List<String> categories_tags;
     private List<String> stores_tags;
     private List<String> brands_tags;
+    private List<String> languages_codes;
     private String product_name;
     private Object nutriments;
     private Object images;
@@ -75,6 +77,14 @@ public class Product implements IProduct {
         this.categories_tags = categories_tags;
     }
 
+    public List<String> getLanguages_codes() {
+        return languages_codes;
+    }
+
+    public void setLanguages_codes(List<String> languages_codes) {
+        this.languages_codes = languages_codes;
+    }
+    
     public Object getNutriments() {
         return this.nutriments;
     }

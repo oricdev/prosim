@@ -17,7 +17,7 @@ public class ProductExt extends Product implements IProduct {
     private Short other_nutrition_score=null;
 
     public ProductExt(Product product) {
-        super(product.getId(), product.getCode(), product.getProduct_name(), product.getCountries_tags(), product.getCategories_tags(), product.getBrands_tags(), product.getLanguages_codes(), product.getStores_tags(), product.getNutriments(), product.getImages(), product.getNutrition_score_uk());
+        super(product.getId(), product.getCode(), product.getProduct_name(), product.getCountries_tags(), product.getCategories_tags(), product.getBrands_tags(), product.getStores_tags(), product.getLanguages_codes(), product.getNutriments(), product.getImages(), product.getNutrition_score_uk());
         this.computeNutritionScore();
     }
 

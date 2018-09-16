@@ -27,13 +27,13 @@ Note: when running the intersect project below, you must have Write access of co
 
 > /outputs/feeders/feeder_1.txt
 
-* feeder_2.py: in current version (first initialisation of Prosim-db), does the same as feeder_1 (used as Width matrix for the intersections).
+* feeder_2.py: in current version (first initialisation of Prosim-db), does the same as feeder_1 (used as heigth matrix for the intersections).
 Shall be enhanced versions so that it extracts only new and updated products from a specific date.
 > /outputs/feeders/updated_products.json
 
 > /outputs/feeders/feeder_2.txt
 
-Only some fields are extracted( projection), not all of them. Beware that **all_products.json** may be something like **2GB large**!
+Only some fields are extracted( projection), not all of them. Beware that **all_products.json** may be something like **1GB or 2GB large**!
 
 Update the code if you wish to extract more information for building your own Prosim-db.
 

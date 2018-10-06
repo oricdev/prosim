@@ -96,9 +96,6 @@ public class ComputingInstance {
         // solides
         /*
          * ici https://fr.openfoodfacts.org/score-nutritionnel-experimental-france
-         * A - Vert : jusqu'à
-         * -1 B - Jaune : de 0 à 2 C - Orange : de 3 à 10 D - Rose : de 11 à 18 E -
-         * Rouge : 19 et plus
          */
         Short score = null;
         if (product.getNutrition_score_uk() != null) {

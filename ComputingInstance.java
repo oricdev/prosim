@@ -28,7 +28,7 @@ public class ComputingInstance {
     // to add your own graph, to query your db through the PROSIM-Engine API, etc.)
     public static final String DB_NICKNAME = "nutriscore";
     // .. MongoDb Name : must start with "tuttifrutti_"
-    public static final String DB_NAME = "tuttifrutti_off_nutriscore";
+    public static final String DB_NAME = "tuttifrutti_nutriscore";
     // .. summary of the purpose of the database (ex.: products without gluten,
     // vegan products, etc.)
     public static final String DB_SUMMARY = "worldwide products based on their nutriscore";
@@ -95,20 +95,21 @@ public class ComputingInstance {
         // todo: distinguer Eaux et Boissons des aliments solides .. ici, que aliments
         // solides
         /*
-         * ici http://fr.openfoodfacts.org/score-nutritionnel-france A - Vert : jusqu'à
+         * ici https://fr.openfoodfacts.org/score-nutritionnel-experimental-france
+         * A - Vert : jusqu'à
          * -1 B - Jaune : de 0 à 2 C - Orange : de 3 à 10 D - Rose : de 11 à 18 E -
          * Rouge : 19 et plus
          */
         Short score = null;
         if (product.getNutrition_score_uk() != null) {
             double score_uk = product.getNutrition_score_uk();
-            if (score_uk >= 19) {
+            if (score_uk >= 17) {
                 score = 1;
-            } else if (score_uk >= 11) {
+            } else if (score_uk >= 12) {
                 score = 2;
-            } else if (score_uk >= 3) {
+            } else if (score_uk >= 4) {
                 score = 3;
-            } else if (score_uk >= 0) {
+            } else if (score_uk >= -1) {
                 score = 4;
             } else {
                 score = 5;

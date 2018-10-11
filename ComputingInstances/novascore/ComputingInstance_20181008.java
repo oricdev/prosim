@@ -42,6 +42,11 @@ public class ComputingInstance {
     // intersections, 60=similarity of pairs of products with a minimum of 60%,
     // etc.)
     public static final String SIMILARITY_MIN_PERCENTAGE = "60";
+    // Min and Max values returned by the computeScore method
+    public static final Short SCORE_MIN_VALUE = 1;
+    public static final Short SCORE_MAX_VALUE = 4;
+    // If a higher value returned by the computeScore method means a BETTER value, then set bottom_up to true
+    public static final Boolean bottom_up = false;
     // .. your name, nick name (will be displayed in statistics, help, as creator of
     // the database)
     public static final String YOUR_NAME = "oric.dev";
@@ -66,7 +71,7 @@ public class ComputingInstance {
      * products of a specific country, ignore products with allergens, etc.
      */
     public static boolean filter(ProductExt product) {
-        return product.getNova_group() != null;
+        return true;
     }
 
     /*
@@ -94,9 +99,6 @@ public class ComputingInstance {
     public static Short computeScore(ProductExt product) {
         // Returned value is between 1 (best score) and 4 (worst score)
         Double nova_score = product.getNova_group();
-        if (nova_score != null) {
-            return nova_score.shortValue();
-        }
-        return null;
+        return nova_score.shortValue();
     }
 }

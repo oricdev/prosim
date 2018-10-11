@@ -42,6 +42,9 @@ public class ComputingInstance {
     // intersections, 60=similarity of pairs of products with a minimum of 60%,
     // etc.)
     public static final String SIMILARITY_MIN_PERCENTAGE = "60";
+    // Min and Max values returned by the computeScore method
+    public static final Short SCORE_MIN_VALUE = 1;
+    public static final Short SCORE_MAX_VALUE = 5;
     // .. your name, nick name (will be displayed in statistics, help, as creator of
     // the database)
     public static final String YOUR_NAME = "oric.dev";
@@ -96,6 +99,7 @@ public class ComputingInstance {
         // solides
         /*
          * ici https://fr.openfoodfacts.org/score-nutritionnel-experimental-france
+         * A - Vert : jusqu'à
          */
         Short score = null;
         if (product.getNutrition_score_uk() != null) {

@@ -45,6 +45,8 @@ public class ComputingInstance {
     // Min and Max values returned by the computeScore method
     public static final Short SCORE_MIN_VALUE = 1;
     public static final Short SCORE_MAX_VALUE = 5;
+    // If a higher value returned by the computeScore method means a BETTER value, then set bottom_up to true
+    public static final Boolean bottom_up = true;
     // .. your name, nick name (will be displayed in statistics, help, as creator of
     // the database)
     public static final String YOUR_NAME = "oric.dev";
@@ -99,7 +101,6 @@ public class ComputingInstance {
         // solides
         /*
          * ici https://fr.openfoodfacts.org/score-nutritionnel-experimental-france
-         * A - Vert : jusqu'à
          */
         Short score = null;
         if (product.getNutrition_score_uk() != null) {

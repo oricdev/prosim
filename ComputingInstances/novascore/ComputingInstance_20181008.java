@@ -101,6 +101,6 @@ public class ComputingInstance {
     public static Short computeScore(ProductExt product) {
         // Returned value is between 1 (best score) and 4 (worst score)
         Double nova_score = product.getNova_group();
-        return nova_score.shortValue();
+        return (null == nova_score) ? null : nova_score.shortValue();
     }
 }

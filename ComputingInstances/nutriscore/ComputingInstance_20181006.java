@@ -27,6 +27,8 @@ public class ComputingInstance {
     // chars except "_" (used for building progression statistics, in OFF_GRAPH App
     // to add your own graph, to query your db through the PROSIM-Engine API, etc.)
     public static final String DB_NICKNAME = "nutriscore";
+    // .. name being displayed client side (GUI)
+    public static final String DB_DISPLAY_NAME = "Nutriscore";
     // .. MongoDb Name : must start with "tuttifrutti_"
     public static final String DB_NAME = "tuttifrutti_nutriscore";
     // .. summary of the purpose of the database (ex.: products without gluten,

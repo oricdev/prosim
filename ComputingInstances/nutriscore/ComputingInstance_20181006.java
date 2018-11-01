@@ -30,7 +30,7 @@ public class ComputingInstance {
     // .. name being displayed client side (GUI)
     public static final String DB_DISPLAY_NAME = "Nutriscore";
     // .. MongoDb Name : must start with "tuttifrutti_"
-    public static final String DB_NAME = "tuttifrutti_nutriscore";
+    public static final String DB_NAME = "tuttifrutti_nutriscore_next";
     // .. summary of the purpose of the database (ex.: products without gluten,
     // vegan products, etc.)
     public static final String DB_SUMMARY = "worldwide products based on their nutriscore";

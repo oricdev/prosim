@@ -199,4 +199,30 @@ Add the end of the file the following lines and saves it:
 
 *Note*: erroneous data files (as mentioned above) are **not deleted** but moved to *../errors*. Check this location regularly if you ever lack from disk space.
 
+## Customizing Prosim to run on another Score
+The code delivered on github under the *project* directory performs computations of similar products based on their **Nutrition-score** (Nutriscore).
+
+This computation is fully customizable and is contained into a file called **ComputingInstance.java**.
+
+The *Nutriscore* version of this file has been injected into the *project* after compilation:
+> prosim/project/tasks/preparer/preparer_netbeans/src/main/java/org/openfoodfacts/computers/ComputingInstance.class
+
+If you want the Prosim project to compute similarities of OpenFoodFact products using another score (e.g. *Nova 
+Classification* or your own-one; check in the *ComputingInstances* directory above for other versions), you have to **COMPILE** and **INJECT**
+the corresponding *ComputingInstance.class* file at this exact location (under *computers* directory).
+
+Personally, I am doing it this way:
+- update of the *ComputingInstance.java* file: it has at the end to be called this way!
+- compile it with dependencies (held in the *jar* of preparer task) in order to get a *ComputingInstance.class* file:
+> javac -cp project/tasks/preparer/preparer_netbeans/target/preparer_netbeans-1.0-SNAPSHOT-jar-with-dependencies.jar ComputingInstance.java
+- unzip the file:
+> prosim/project/tasks/intersect/target/intersect-1.0-SNAPSHOT-jar-with-dependencies.jar
+- replace the *ComputingInstance.class* with the one you have just created inside the unzipped jar file:
+> intersect-1.0-SNAPSHOT-jar-with-dependencies/org/openfoodfacts/computers/
+- zip back as a *jar* the content of this directory:
+> intersect-1.0-SNAPSHOT-jar-with-dependencies
+- you can now launch the **intersecter** using this command directly or through a script:
+> java -cp target/intersect-1.0-SNAPSHOT-jar-with-dependencies.jar org.openfoodfacts.intersect/Main
+
+
 Feel free to contact the author in case of questions, remarks, suggestions. I will be happy to help :).

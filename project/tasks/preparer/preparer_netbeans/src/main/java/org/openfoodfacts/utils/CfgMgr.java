@@ -1,3 +1,13 @@
+/*
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
+ * Results are stored in a Mongo-Database.
+ *
+ * Url: https://offmatch.blogspot.com/
+ * Author/Developer: Olivier Richard (oric_dev@iznogoud.neomailbox.ch)
+ * License: GNU Affero General Public License v3.0
+ * License url: https://github.com/oricdev/prosim/blob/master/LICENSE
+ */
 package org.openfoodfacts.utils;
 
 import java.io.File;
@@ -20,10 +30,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-/**
- *
- * @author oric
- */
+
 public class CfgMgr {
 
     final static Logger logger = Logger.getLogger(CfgMgr.class);
@@ -40,9 +47,10 @@ public class CfgMgr {
             tag_value = xpath.evaluate(xpath_expr, xml_file);
             if (tag_value.equals("")) {
                 logger.info("reading '" + xml_fname + "' file: " + tag + " is empty => starting from BEGINNING");
-            } else {
-                logger.info("reading '" + xml_fname + "' file: " + tag + " => " + tag_value);
             }
+            //else {
+            //    logger.info("reading '" + xml_fname + "' file: " + tag + " => " + tag_value);
+            //}
         } catch (XPathExpressionException e) {
             logger.error("could not retrieve tag '" + tag + "' from " + xml_fname + " file!");
         } finally {

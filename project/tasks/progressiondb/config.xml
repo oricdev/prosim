@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NOT USED SINCE HAS BEEN REPLACED BY THE DBSTATS TASK -->
+
+<!--
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
+ * Results are stored in a Mongo-Database.
+ *
+ * Url: https://offmatch.blogspot.com/
+ * Author/Developer: Olivier Richard (oric_dev@iznogoud.neomailbox.ch)
+ * License: GNU Affero General Public License v3.0
+ * License url: https://github.com/oricdev/prosim/blob/master/LICENSE
+ * -->
+<!-- mode = host | path wether accessing remote Boinc server (server_host) or local directory (server_path) -->
+<config>
+    <path_to_root>../..</path_to_root>
+    <!-- set of tags for each Database available (Nutriscore, Novascore, etc.) -->
+    
+    <!-- :: NutritionScore  -->
+    <db_name>tuttifrutti_off_nutriscore</db_name>
+    <!-- todo: remove this below when preparer.config.xml ok -->
+    <task_preparer_matrix_height>2000</task_preparer_matrix_height>
+    <task_preparer_path>tasks/preparer/preparer_netbeans</task_preparer_path>
+    <preparer_config_file>config.xml</preparer_config_file>
+    <preparer_progression_file>progress.xml</preparer_progression_file>
+    <out_path_feeders_json>/outputs/feeders</out_path_feeders_json>
+    <out_w_products>all_products.json</out_w_products>
+    <out_h_products>updated_products.json</out_h_products>
+    
+    <!-- :: NovaScore  -->
+    <!-- etc ... -->
+</config>

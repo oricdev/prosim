@@ -1,39 +1,52 @@
+/*
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
+ * Results are stored in a Mongo-Database.
+ *
+ * Url: https://offmatch.blogspot.com/
+ * Author/Developer: Olivier Richard (oric_dev@iznogoud.neomailbox.ch)
+ * License: GNU Affero General Public License v3.0
+ * License url: https://github.com/oricdev/prosim/blob/master/LICENSE
+ */
 package org.openfoodfacts.products;
 
 import com.google.gson.internal.LinkedTreeMap;
 import java.util.List;
 
-/**
- *
- * @author oric
- */
+
 public class Product implements IProduct {
 
-    public Product(String _id, String code, String product_name, List<String> countries_tags, List<String> categories_tags, List<String> brands_tags, List<String> stores_tags, Object languages_codes, Object nutriments, Object images, Float nutrition_score_uk) {
+    public Product(String _id, String code, String product_name, String pnns_groups_1, List<String> countries_tags, List<String> categories_tags, List<String> ingredients_tags, List<String> brands_tags, List<String> stores_tags, Object languages_codes, Object nutriments, Double nova_group, Object images, Float nutrition_score_uk) {
         this.code = code;
         this.product_name = product_name;
+        this.pnns_groups_1 = pnns_groups_1;
         this.countries_tags = countries_tags;
         this.categories_tags = categories_tags;
+        this.ingredients_tags = ingredients_tags;
         this.brands_tags = brands_tags;
         this.languages_codes = languages_codes;
         this.stores_tags = stores_tags;
         this.nutriments = nutriments;
+        this.nova_group = nova_group;
         this.images = images;
         this.nutrition_score_uk = nutrition_score_uk;
         this._id = _id;
     }
 
-    private String code;
-    private List<String> countries_tags;
-    private List<String> categories_tags;
-    private List<String> stores_tags;
-    private List<String> brands_tags;
-    private Object languages_codes;
-    private String product_name;
-    private Object nutriments;
-    private Object images;
-    private Float nutrition_score_uk;
-    private String _id;
+    protected String code;
+    protected List<String> countries_tags;
+    protected List<String> categories_tags;
+    protected List<String> ingredients_tags;
+    protected List<String> stores_tags;
+    protected List<String> brands_tags;
+    protected Object languages_codes;
+    protected String product_name;
+    protected String pnns_groups_1;
+    protected Object nutriments;
+    protected Double nova_group;
+    protected Object images;
+    protected Float nutrition_score_uk;
+    protected String _id;
     
     
     /*
@@ -46,7 +59,7 @@ public class Product implements IProduct {
     }
 
     public String getId() {
-        return _id;
+        return this._id;
     }
 
     public void setId(String _id) {
@@ -54,7 +67,7 @@ public class Product implements IProduct {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public void setCode(String code) {
@@ -62,7 +75,7 @@ public class Product implements IProduct {
     }
 
     public List<String> getCountries_tags() {
-        return countries_tags;
+        return this.countries_tags;
     }
 
     public void setCountries_tags(List<String> countries_tags) {
@@ -70,15 +83,23 @@ public class Product implements IProduct {
     }
 
     public List<String> getCategories_tags() {
-        return categories_tags;
+        return this.categories_tags;
     }
 
     public void setCategories_tags(List<String> categories_tags) {
         this.categories_tags = categories_tags;
     }
+    
+    public List<String> getIngredients_tags() {
+        return this.ingredients_tags;
+    }
+
+    public void setIngredients_tags(List<String> ingredients_tags) {
+        this.ingredients_tags = ingredients_tags;
+    }
 
     public Object getLanguages_codes() {
-        return languages_codes;
+        return this.languages_codes;
     }
 
     public void setLanguages_codes(Object languages_codes) {
@@ -93,8 +114,16 @@ public class Product implements IProduct {
         this.nutriments = nutriments;
     }
 
+    public Double getNova_group() {
+        return this.nova_group;
+    }
+
+    public void setNova_group(Double nova_group) {
+        this.nova_group = nova_group;
+    }
+
     public Float getNutrition_score_uk() {
-        return nutrition_score_uk;
+        return this.nutrition_score_uk;
     }
 
     public void setNutrition_score_uk(Float nutrition_score_uk) {
@@ -102,7 +131,7 @@ public class Product implements IProduct {
     }
 
     public List<String> getStores_tags() {
-        return stores_tags;
+        return this.stores_tags;
     }
 
     public void setStores_tags(List<String> stores_tags) {
@@ -110,7 +139,7 @@ public class Product implements IProduct {
     }
 
     public List<String> getBrands_tags() {
-        return brands_tags;
+        return this.brands_tags;
     }
 
     public void setBrands_tags(List<String> brands_tags) {
@@ -118,15 +147,23 @@ public class Product implements IProduct {
     }
 
     public String getProduct_name() {
-        return product_name;
+        return this.product_name;
     }
 
     public void setProduct_name(String product_name) {
         this.product_name = product_name;
     }
 
+    public String getPnns_groups_1() {
+        return this.pnns_groups_1;
+    }
+
+    public void setPnns_groups_1(String pnns_groups_1) {
+        this.pnns_groups_1 = pnns_groups_1;
+    }
+    
     public Object getImages() {
-        return images;
+        return this.images;
     }
 
     public void setImages(Object images) {

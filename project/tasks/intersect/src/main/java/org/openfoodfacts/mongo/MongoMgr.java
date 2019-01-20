@@ -1,4 +1,15 @@
 /*
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
+ * Results are stored in a Mongo-Database.
+ *
+ * Url: https://offmatch.blogspot.com/
+ * Author/Developer: Olivier Richard (oric_dev@iznogoud.neomailbox.ch)
+ * License: GNU Affero General Public License v3.0
+ * License url: https://github.com/oricdev/prosim/blob/master/LICENSE
+ */
+
+ /*
  * useful links here:
  * https://docs.mongodb.com/manual/tutorial/
  * Indexes: https://stackoverflow.com/questions/44413520/how-to-make-indexes-and-different-unique-indexes-in-morphia-java
@@ -13,17 +24,17 @@ package org.openfoodfacts.mongo;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoCollection;
 import java.util.List;
 import org.apache.log4j.Logger;
+import org.bson.Document;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.query.Query;
 import org.openfoodfacts.entities.Prosim;
+import org.openfoodfacts.products.products;
 
-/**
- *
- * @author olivier
- */
+
 public class MongoMgr {
 
     final static Logger logger = Logger.getLogger(MongoMgr.class);
@@ -45,8 +56,12 @@ public class MongoMgr {
         }
     }
 
-    public static void connect(String host, int port, String login, String pwd, String dbname, String mode) {
-        MongoMgr.importMode = EnumMongoImportMode.valueOf(mode);
+    public static void connect(String host, int port, String login, String pwd, String dbname, String mode, boolean ensureIndexes) {
+        if (mode.isEmpty()) {
+            MongoMgr.importMode = EnumMongoImportMode.QUICK_INIT;
+        } else {
+            MongoMgr.importMode = EnumMongoImportMode.valueOf(mode);
+        }
         logger.info("****************************************************");
         logger.info("Mongo Import Mode has been set to <" + mode + ">");
         logger.info("****************************************************");
@@ -65,12 +80,15 @@ public class MongoMgr {
         } else {
             MongoMgr.mongo = new MongoClient(new MongoClientURI(mongo_connect_string.toString()));
         }
+
         MongoMgr.morphia = new Morphia();
         MongoMgr.ds = MongoMgr.morphia.createDatastore(MongoMgr.mongo, MongoMgr.dbname);
 
         MongoMgr.morphia.mapPackage("org.openfoodfacts.entities");
-        // create indexes if unavailable
-        MongoMgr.ds.ensureIndexes();
+        if (ensureIndexes) {
+            // create indexes if unavailable
+            MongoMgr.ds.ensureIndexes();
+        }
     }
 
     public static void disconnect() {
@@ -123,8 +141,9 @@ public class MongoMgr {
         logger.debug("database <" + dbname + "> has been SUCCESSFULLY deleted.");
     }
 
-    public static void getAllProducts() {
-
+    public static MongoCollection<Document> getAllProducts(String dbname, String dbcoll) {
+        MongoCollection mongoColl = MongoMgr.mongo.getDatabase(dbname).getCollection(dbcoll);
+        return mongoColl;
     }
 
     public static boolean existsProduct(String code) {
@@ -139,13 +158,23 @@ public class MongoMgr {
     /**
      * Number of products in database
      *
-     * @param host
-     * @param port
-     * @param dbname
      * @return
      */
-    public static long getCountProducts() {
+    public static long getCountProducts_Prosim() {
         Query<Prosim> query = MongoMgr.ds.createQuery(Prosim.class);
+        return MongoMgr.ds.getCount(query);
+    }
+
+    public static double getStorageSize() throws ClassCastException {
+        return (Double) MongoMgr.ds.getDB().getStats().get("dataSize");
+    }
+    /**
+     * Number of products in database
+     *
+     * @return
+     */
+    public static long getCountProducts_products() {
+        Query<products> query = MongoMgr.ds.createQuery(products.class);
         return MongoMgr.ds.getCount(query);
     }
 }

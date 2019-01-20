@@ -1,8 +1,0 @@
-<config>
-    <path_to_root>../../..</path_to_root>
-    <out_path>/outputs/feeders</out_path>
-    <out_file_feeder_1_all_products>all_products.json</out_file_feeder_1_all_products>
-    <out_file_feeder_2_updated_products>updated_products.json</out_file_feeder_2_updated_products>
-    <out_file_ok_feeder_1>feeder_1_ok.txt</out_file_ok_feeder_1>
-    <out_file_ok_feeder_2>feeder_2_ok.txt</out_file_ok_feeder_2>
-</config>

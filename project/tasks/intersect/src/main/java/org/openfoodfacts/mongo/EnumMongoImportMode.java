@@ -1,5 +1,18 @@
-/* This mode is to be set in the config.xml file.
-* The mode is VERY IMPORTANT and should be handled with great care.
+/*
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
+ * Results are stored in a Mongo-Database.
+ *
+ * Url: https://offmatch.blogspot.com/
+ * Author/Developer: Olivier Richard (oric_dev@iznogoud.neomailbox.ch)
+ * License: GNU Affero General Public License v3.0
+ * License url: https://github.com/oricdev/prosim/blob/master/LICENSE
+ */
+
+/* NOTE: only QUICK_INIT is used!
+ *
+ * This mode is to be set in the config.xml file.
+ * The mode is VERY IMPORTANT and should be handled with great care.
  * First thing to understand is that the current process inserts into the Mongo db a subset (data-matrix set) of the overall grid of products.
  * Hence a product in db with similarity field set (similar products) may be inserted again the db with extra similar products coming from the partial intersection process.
  * In this case, we may want:

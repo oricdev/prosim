@@ -9,6 +9,8 @@ Basically, it computes pair-wise the *similarity* and *score* between **OpenFood
 More resources here:
 - PROSIM blog:\
 https://offmatch.blogspot.com/
+- **architecture** of PROSIM explained:\
+https://offmatch.blogspot.com/2018/10/architecture-map.html
 - OFF-GRAPH blog (client):\
 https://offgraphs.blogspot.com/2018/09/api-usage-for-getting-similar-products.html
 - the TUTTIFRUTTI website (top of the iceberg):\

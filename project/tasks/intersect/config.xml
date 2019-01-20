@@ -1,23 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
+ * Results are stored in a Mongo-Database.
+ *
+ * Url: https://offmatch.blogspot.com/
+ * Author/Developer: Olivier Richard (oric_dev@iznogoud.neomailbox.ch)
+ * License: GNU Affero General Public License v3.0
+ * License url: https://github.com/oricdev/prosim/blob/master/LICENSE
+ * -->
 <config>
     <!-- Max. Db size allowed in Giga Bytes (decimal allowed such as 0.4 for instance) -->
-    <max_db_size_gigabytes>35</max_db_size_gigabytes>
+    <max_db_size_gigabytes>0.3</max_db_size_gigabytes>
     <!-- Update this value and re-import from the beginning if you change this value! -->
     <similarity_min_percentage>60</similarity_min_percentage>
-    <!-- Import modes into Mongo-Db: QUICK_INIT or FULL_CHECK_UPDATE (only QUICK_INIT available in current version when building the db from scratch! FULL_CHECK_UPDATE is foreseen for updating the database with deltas thereafter) -->
-    <!-- refer to documentation for further information -->
+    <!-- Import modes into Mongo-Db: QUICK_INIT or FULL_CHECK_UPDATE -->
     <mongo_import_mode>QUICK_INIT</mongo_import_mode>
     <path_to_root>../..</path_to_root>
+    <path_to_logfile_name>logs/log_intersecter.log</path_to_logfile_name>
     <!-- stop intersect-process when the number of data-packages in incoming directory is equal to this number -->
-    <stop_when_min_data_reached>3</stop_when_min_data_reached>
+    <stop_when_min_data_reached>2</stop_when_min_data_reached>
+    <!-- <path_absolute_incoming_data>/home/olivier/_developpement/off_boinc_dev/boinc_server/data_incoming</path_absolute_incoming_data>-->
     <path_to_incoming_data>outputs/preparer/</path_to_incoming_data>
+    <!-- no need output !!
+    <path_absolute_output_results>/home/olivier/_developpement/off_boinc_dev/boinc_server/upload</path_absolute_output_results> -->
     <backup_dirname>backup</backup_dirname>
-    <!-- OFF remote db with matching products -->
-    <!--off_dest_host>mongodb-tuttifrutti.alwaysdata.net</off_dest_host>
+    <!-- OFF remote db with matching products 
+    <off_dest_host>mongodb-tuttifrutti.alwaysdata.net</off_dest_host>
     <off_dest_port></off_dest_port>
     <off_dest_db_name>tuttifrutti_off_match</off_dest_db_name>
-    <off_dest_login></off_dest_login>
-    <off_dest_pwd></off_dest_pwd--> 
+    <off_dest_login>tuttifrutti_oric</off_dest_login>
+    <off_dest_pwd></off_dest_pwd> -->
     
     <!-- localhost -->
     <off_dest_host>127.0.0.1</off_dest_host>

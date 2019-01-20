@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
+ * Results are stored in a Mongo-Database.
+ *
+ * Url: https://offmatch.blogspot.com/
+ * Author/Developer: Olivier Richard (oric_dev@iznogoud.neomailbox.ch)
+ * License: GNU Affero General Public License v3.0
+ * License url: https://github.com/oricdev/prosim/blob/master/LICENSE
+ * -->
+<!-- mode = host | path wether accessing remote Boinc server (server_host) or local directory (server_path) -->
+<config mode="path">
+    <path_to_root>../..</path_to_root>
+    <!-- remote
+    <off_orig_host>mongodb-tuttifrutti.alwaysdata.net</off_orig_host>
+    <off_orig_port></off_orig_port>
+    <off_orig_db_name>tuttifrutti_off_match_2</off_orig_db_name>
+    <off_orig_db_collection>Prosim</off_orig_db_collection>
+    <off_orig_login>tuttifrutti_reader</off_orig_login>
+    <off_orig_pwd>reader</off_orig_pwd> -->
+    
+    <!-- localhost -->
+    <off_orig_host>127.0.0.1</off_orig_host>
+    <off_orig_port>27017</off_orig_port>
+    <off_orig_db_name>off_match</off_orig_db_name>
+    <off_orig_db_collection>Prosim</off_orig_db_collection>
+    <off_orig_login></off_orig_login>
+    <off_orig_pwd></off_orig_pwd>
+</config>

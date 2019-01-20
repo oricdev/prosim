@@ -1,5 +1,16 @@
+/*
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
+ * Results are stored in a Mongo-Database.
+ *
+ * Url: https://offmatch.blogspot.com/
+ * Author/Developer: Olivier Richard (oric_dev@iznogoud.neomailbox.ch)
+ * License: GNU Affero General Public License v3.0
+ * License url: https://github.com/oricdev/prosim/blob/master/LICENSE
+ */
 package org.openfoodfacts.preparer;
 
+import org.openfoodfacts.utils.JsonTools;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,7 +29,7 @@ import org.openfoodfacts.utils.Tuple;
 
 /**
  *
- * @author oric useful links: :gson: https://github.com/google/gson :gson api:
+ * useful links: :gson: https://github.com/google/gson :gson api:
  * http://www.javadoc.io/doc/com.google.code.gson/gson/2.8.5 :gson sample
  * streaming: https://sites.google.com/site/gson/streaming :log4j:
  * https://www.mkyong.com/logging/log4j-hello-world-example/
@@ -102,6 +113,10 @@ public class Main {
         int nb_files = 0;
         boolean isFinished = false;
         boolean isSomethingWrong = false;
+        
+        String fullpath_updated_products = CfgMgr.getConf(CONF_PATH_TO_ROOT) + File.separator + CfgMgr.getConf(Main.CONF_PATH_OUT_FEEDERS) + File.separator + CfgMgr.getConf(Main.CONF_OUT_FNAME_UPDATED_PRODUCTS);
+        int height = Integer.parseInt(CfgMgr.getConf(Main.CONF_HEIGHT));
+        String fullpath_all_products = CfgMgr.getConf(CONF_PATH_TO_ROOT) + File.separator + CfgMgr.getConf(Main.CONF_PATH_OUT_FEEDERS) + File.separator + CfgMgr.getConf(Main.CONF_OUT_FNAME_ALL_PRODUCTS);
         int width = Integer.parseInt(CfgMgr.getConf(Main.CONF_WIDTH));
 
         do {
@@ -111,8 +126,8 @@ public class Main {
             String last_code_w = getProgress(PROGRESS_LAST_CODE_ALL_PRODUCTS);
             // ..last barcode of UPDATED products processed in previous batch (h=height in Matrix)
             String last_code_h = getProgress(PROGRESS_LAST_CODE_UPDATED_PRODUCTS);
-
-            Tuple< List<IProduct>, List<IProduct>> cell_matrix = JsonTools.extractOneCellMatrix(last_code_h, last_code_w);
+            
+            Tuple< List<IProduct>, List<IProduct>> cell_matrix = JsonTools.extractOneCellMatrix(last_code_h, last_code_w, fullpath_all_products, width, fullpath_updated_products, height);
             isSomethingWrong = cell_matrix == null;
             if (!isSomethingWrong) {
                 int cell_width = cell_matrix.x.size();

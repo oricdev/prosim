@@ -1,3 +1,13 @@
+/*
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
+ * Results are stored in a Mongo-Database.
+ *
+ * Url: https://offmatch.blogspot.com/
+ * Author/Developer: Olivier Richard (oric_dev@iznogoud.neomailbox.ch)
+ * License: GNU Affero General Public License v3.0
+ * License url: https://github.com/oricdev/prosim/blob/master/LICENSE
+ */
 package org.openfoodfacts.utils;
 
 import java.io.File;
@@ -10,10 +20,7 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 import java.util.logging.Level;
 
-/**
- *
- * @author oric
- */
+
 public class FileMgr {
 
     final static Logger logger = Logger.getLogger(FileMgr.class);
@@ -82,15 +89,15 @@ public class FileMgr {
         return oldestDataset;
     }
 
-    public static void backup(String backup_dir, File dirDataset) {
+    public static void moveDir(String dest_dir, File dirDataset) {
         if (!dirDataset.isDirectory()) {
             logger.error("cannot backup '" + dirDataset.getAbsolutePath() + "' since it is NOT a directory!");
             logger.error("Process aborted!");
         } else {
             try {
-                FileMgr.mkdir(backup_dir);
+                FileMgr.mkdir(dest_dir);
                 String dataset_dir_part = dirDataset.getPath().split("/")[dirDataset.getPath().split("/").length - 1];
-                String dest_backup_dir = backup_dir.concat("/").concat(dataset_dir_part);
+                String dest_backup_dir = dest_dir.concat("/").concat(dataset_dir_part);
                 Path path_backup = FileSystems.getDefault().getPath(dest_backup_dir);
                 Files.move(dirDataset.toPath(), path_backup);
             } catch (IOException ex) {
@@ -99,5 +106,51 @@ public class FileMgr {
             }
 
         }
+    }
+
+    public static void deleteDataset(File dirDataset) {
+        if (!dirDataset.isDirectory()) {
+            logger.error("cannot delete '" + dirDataset.getAbsolutePath() + "' since it is NOT a directory!");
+            logger.error("Process aborted!");
+        } else {
+            deleteDirectory(dirDataset);
+        }
+    }
+
+    /*
+    * Retrieved from:
+    * https://stackoverflow.com/questions/3775694/deleting-folder-from-java
+     */
+    protected static boolean deleteDirectory(File directory) {
+        if (directory.exists()) {
+            logger.info("deleting <" + directory.getAbsolutePath() + ">..");
+            File[] files = directory.listFiles();
+            if (null != files) {
+                for (int i = 0; i < files.length; i++) {
+                    if (files[i].isDirectory()) {
+                        deleteDirectory(files[i]);
+                    } else {
+                        files[i].delete();
+                    }
+                }
+            }
+        }
+        return (directory.delete());
+    }
+
+    public static boolean createLockFile(String dirpath, String filename) {
+        boolean success = true;
+
+        try {
+            FileMgr.mkdir(dirpath);
+            String full_lock_filename = dirpath.concat("/").concat(filename);
+            File file = new File(full_lock_filename);
+            success = file.createNewFile();
+        } catch (IOException ioex) {
+            logger.error("lock file could not be created!");
+            logger.error(ioex.getMessage());
+            success = false;
+        }
+        return success;
     }
 }

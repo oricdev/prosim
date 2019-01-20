@@ -2,7 +2,7 @@
 
 ***PROSIM*** stands for PROduct SIMilarity.
 
-It is the backend-engine empowering its client-side pendant application ***off_graph*** which is accessible on the [Tuttifrutti](https://tuttifrutti.alwaysdata.net/) website.
+It is the backend-engine empowering its client-side pendant application [off_graph](https://github.com/oricdev/off_product_comparator) which is accessible on the [Tuttifrutti](https://tuttifrutti.alwaysdata.net/) website.
 
 Basically, it computes pair-wise the *similarity* and *score* between **OpenFoodFacts** products. Scores can be of different kinds: *Nutrition-score*, *Nova Classification*, or even [your own score](https://offmatch.blogspot.com/2018/10/how-can-i-request-new-score-database.html).
 
@@ -11,6 +11,9 @@ More resources here:
 https://offmatch.blogspot.com/
 - **architecture** of PROSIM explained:\
 https://offmatch.blogspot.com/2018/10/architecture-map.html
+- OFF-GRAPH source-code:\
+https://github.com/oricdev/off_product_comparator \
+*Note*: do not use the *repository off_graph* since it is too old! It is listed in my repositories for *Archive*-purposes solely.
 - OFF-GRAPH blog (client):\
 https://offgraphs.blogspot.com/2018/09/api-usage-for-getting-similar-products.html
 - the TUTTIFRUTTI website (top of the iceberg):\

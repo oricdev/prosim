@@ -10,10 +10,10 @@
  * License url: https://github.com/oricdev/prosim/blob/master/LICENSE
  * -->
 <config>
-    <!-- Max. Db size allowed in Giga Bytes (decimal allowed such as 0.4 for instance) -->
+    <!-- NOT IMPLEMENTED // Max. Db size allowed in Giga Bytes (decimal allowed such as 0.4 for instance) -->
     <max_db_size_gigabytes>0.3</max_db_size_gigabytes>
-    <!-- Update this value and re-import from the beginning if you change this value! -->
-    <similarity_min_percentage>60</similarity_min_percentage>
+    <!-- NOT USED anymore (stored in ComputingInstance file instead) // Update this value and re-import from the beginning if you change this value! -->
+    <!--similarity_min_percentage>60</similarity_min_percentage-->
     <!-- Import modes into Mongo-Db: QUICK_INIT or FULL_CHECK_UPDATE -->
     <mongo_import_mode>QUICK_INIT</mongo_import_mode>
     <path_to_root>../..</path_to_root>

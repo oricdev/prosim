@@ -50,7 +50,7 @@ public class ComputingInstance {
     // .. max db size in GB (this will be decided by Admin)
     public static final short DB_MAX_SIZE_GB = 3;
     // .. db will store only comparisons which have minimum this percentage (0=all
-    // intersections, 60=similarity of pairs of products with a minimum of 60%,
+    // intersections, 75=similarity of pairs of products with a minimum of 75%,
     // etc.)
     public static final String SIMILARITY_MIN_PERCENTAGE = "75";
 

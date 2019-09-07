@@ -108,9 +108,10 @@ public class Main {
             logger.info("retrieving next data set..");
             dirDataset = Main.getPathNextDataSet(Integer.valueOf(CfgMgr.getConf(CONF_STOP_WHEN_MIN_DATA_REACHED)));
 
-            dbSize = MongoMgr.getDbSize();
-            sizeInGB = ((float) dbSize) / 1024 / 1024 / 1024;
-            logger.info("Database SIZE is " + sizeInGB + " GB.");
+            //Raises exception since connection is closed.. needs to be re-opened. Do not activate (size retrieved so far is 0)
+//            dbSize = MongoMgr.getDbSize();
+//            sizeInGB = ((float) dbSize) / 1024 / 1024 / 1024;
+//            logger.info("Database SIZE is " + sizeInGB + " GB.");
         }
 
         MongoMgr.disconnect();
@@ -268,8 +269,9 @@ public class Main {
             Prosim prosim = new Prosim(product);
             productsAggregator.aggregate(prosim);
         }
-        logger.info("After REDUCTION, " + productsAggregator.products.keySet().size() + " products will be inserted/merged in the Mongo-Db.");
+
         MongoMgr.connect(mongo_host, mongo_port, mongo_login, mongo_pwd, mongo_db, mongo_mode, true);
+        logger.info("After REDUCTION, " + productsAggregator.products.keySet().size() + " products will be inserted/merged in the Mongo-Db.");
         logger.info("BEFORE insertion/merge: db <" + mongo_db + "> holds " + MongoMgr.getCountProducts_Prosim() + " products already.");
         // Aggregate once again with entries found in Mongo-Db (merge of similarity fields)
         productsAggregator.products.keySet().forEach((code_product) -> {
@@ -283,7 +285,10 @@ public class Main {
                 MongoMgr.saveProduct(productsAggregator.products.get(code_product));
                 logger.debug("product <" + code_product + "> updated.");
             }
+            // free some space!
+            productsAggregator.products.put(code_product, null);
         });
         logger.info("AFTER insertion/merge: db <" + mongo_db + "> holds " + MongoMgr.getCountProducts_Prosim() + " products.");
+        MongoMgr.disconnect();
     }
 }

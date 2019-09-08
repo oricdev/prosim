@@ -69,17 +69,20 @@ public class Main {
         logger.info("retrieving next data set..");
 
         Main.dbConnect();
-
         Float max_dbSize = Float.valueOf(ProductComputer.getDbMaxSize());
         double dbSize = MongoMgr.getDbSize();
+        Main.disconnect();
         float sizeInGB = ((float) dbSize) / 1024 / 1024 / 1024;
         logger.info("Database SIZE is " + sizeInGB + " GB.");
 
         File dirDataset = Main.getPathNextDataSet(Integer.valueOf(CfgMgr.getConf(CONF_STOP_WHEN_MIN_DATA_REACHED)));
-        while (dirDataset != null && sizeInGB < max_dbSize) {
+        //while (dirDataset != null && sizeInGB < max_dbSize) {
+        while (dirDataset != null) {
+            // TODO: ICI // statistics pour sonde : remettre à 0 les 2 progression
+
             // Erroneous dataset to be moved so that they are not processed anymore
             String errorsDir = dirDataset.getAbsolutePath() + "/../../errors";
-            
+
             Tuple<File, File> dataset = Main.getNextDataPackage(dirDataset);
             List<IProduct> productsExt = null;
             try {
@@ -98,7 +101,7 @@ public class Main {
                 // Main:intersectMatrixProducts -> JsonTools:readJsonStream -> JsonReader.beginArray
                 //
                 // In this case, move directory so that it is not processed anymore and proceed with next-one
-                logger.error("Dataset is possibly mal-formed <"+dirDataset.getAbsolutePath()+">.");
+                logger.error("Dataset is possibly mal-formed <" + dirDataset.getAbsolutePath() + ">.");
                 logger.error("This dataset is being moved to the 'errors' directory!");
                 logger.error(jse.getMessage());
                 FileMgr.moveDir(errorsDir, dirDataset);
@@ -108,10 +111,11 @@ public class Main {
             logger.info("retrieving next data set..");
             dirDataset = Main.getPathNextDataSet(Integer.valueOf(CfgMgr.getConf(CONF_STOP_WHEN_MIN_DATA_REACHED)));
 
-            //Raises exception since connection is closed.. needs to be re-opened. Do not activate (size retrieved so far is 0)
-//            dbSize = MongoMgr.getDbSize();
-//            sizeInGB = ((float) dbSize) / 1024 / 1024 / 1024;
-//            logger.info("Database SIZE is " + sizeInGB + " GB.");
+            Main.dbConnect();
+            dbSize = MongoMgr.getDbSize();
+            Main.disconnect();
+            sizeInGB = ((float) dbSize) / 1024 / 1024 / 1024;
+            logger.info("Database SIZE is " + sizeInGB + " GB.");
         }
 
         MongoMgr.disconnect();
@@ -226,6 +230,7 @@ public class Main {
                     }
                 }
                 stats_nb_intersects++;
+                // TODO: ICI // output statistics pour la sonce raspberry tous les 1 million d'intersections
             }
         }
 
@@ -253,6 +258,10 @@ public class Main {
         MongoMgr.connect(mongo_host, mongo_port, mongo_login, mongo_pwd, mongo_db, mongo_mode, true);
     }
 
+    private static void disconnect() {
+        MongoMgr.disconnect();
+    }
+    
     private static void feedDb(List<IProduct> productsExt) throws Exception {
         // create db if does not exist yet!
         String mongo_host = CfgMgr.getConf(CONF_OFF_DEST_HOST);
@@ -274,6 +283,8 @@ public class Main {
         logger.info("After REDUCTION, " + productsAggregator.products.keySet().size() + " products will be inserted/merged in the Mongo-Db.");
         logger.info("BEFORE insertion/merge: db <" + mongo_db + "> holds " + MongoMgr.getCountProducts_Prosim() + " products already.");
         // Aggregate once again with entries found in Mongo-Db (merge of similarity fields)
+
+        // TODO: ICI // try to output statistics pour la sonde!!
         productsAggregator.products.keySet().forEach((code_product) -> {
             if (!MongoMgr.existsProduct(code_product)) {
                 MongoMgr.saveProduct(productsAggregator.products.get(code_product));

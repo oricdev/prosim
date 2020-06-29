@@ -244,8 +244,8 @@ public class JsonTools {
                         images = null;
                     }
 
-                    if (mongoDocument.containsKey("nutrition_score_uk")) {
-                        nutrition_score_uk = (Float) mongoDocument.get("nutrition_score_uk");
+                    if (mongoDocument.containsKey("nutritionscore_score")) {
+                        nutrition_score_uk = (Float) mongoDocument.get("nutritionscore_score");
                     } else {
                         nutrition_score_uk = null;
                     }

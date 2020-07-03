@@ -46,7 +46,7 @@ public class CfgMgr {
 
             tag_value = xpath.evaluate(xpath_expr, xml_file);
             if (tag_value.equals("")) {
-                logger.info("reading '" + xml_fname + "' file: " + tag + " is empty => starting from BEGINNING");
+                logger.info("reading '" + xml_fname + "' file: " + tag + " is empty !!");
             }
             //else {
             //    logger.info("reading '" + xml_fname + "' file: " + tag + " => " + tag_value);

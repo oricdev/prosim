@@ -1,6 +1,6 @@
 /*
  * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
- * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
+ * by pairs based on their score (Nutrition Grade, Nova Classification, etc.).
  * Results are stored in a Mongo-Database.
  *
  * Url: https://offmatch.blogspot.com/
@@ -34,7 +34,7 @@ public class Main {
     final static String CONF_PATH_OUT_FEEDERS = "out_path_feeders";
     final static String CONF_FILE_FEEDER = "out_feeder_filename";
     final static String CONF_LOCK_FEEDER_FILENAME = "out_feeder_lock_filename";
-    
+
     // Access to Mongo-Db
     final static String CONF_OFF_ORIG_HOST = "off_orig_host";
     final static String CONF_OFF_ORIG_PORT = "off_orig_port";
@@ -66,12 +66,12 @@ public class Main {
         String json_filename = CfgMgr.getConf(CONF_FILE_FEEDER);
         JsonTools.writeJsonStreamWithMongoCursor(dir_path, json_filename, cursor_products);
         MongoMgr.disconnect();
-        
+
         // Create a lock file when finished
         logger.info("creating lock file...");
         String lock_filename = CfgMgr.getConf(CONF_LOCK_FEEDER_FILENAME);
         FileMgr.createLockFile(dir_path, lock_filename);
-        
+
         logger.info("Process Feeder_1 finished.");
     }
 

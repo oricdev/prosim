@@ -14,8 +14,8 @@
     <path_to_root>../../..</path_to_root>
     <path_to_logfile_name>logs/log_preparer.log</path_to_logfile_name>
     <!-- Max number of data packages allowed in the output directory. If less, then the preparer task is allowed to produce new data packages/work-units -->
-    <max_output_data>400</max_output_data>
-    <out_path_preparer>/../../../../../media/olivier/Media/off_match/prosim/outputs/preparer/</out_path_preparer>
+    <max_output_data>50</max_output_data>
+    <out_path_preparer>/../../../../../../../../../media/olivier/games/off/engine_github/project/outputs/preparer/</out_path_preparer>
     <out_path_feeders>/outputs/feeders</out_path_feeders>
     <out_all_products>all_products.json</out_all_products>
     <out_updated_products>updated_products.json</out_updated_products>
@@ -30,9 +30,9 @@
     
     <!-- width and height of products' matrix in a single new work unit file (to be transferred for processing on remote/local server) -->
     <width>5000</width>
-    <height>5000</height>
+    <height>3000</height>
         <!-- Statistics purposes: number of products in width and height to import in Mongo db -->
     <!-- Helps maintaining statistics on overall progression (check logs) -->
-    <stats_H_nb_products>283270</stats_H_nb_products>
-    <stats_W_nb_products>283270</stats_W_nb_products>
+    <stats_H_nb_products>806780</stats_H_nb_products>
+    <stats_W_nb_products>806780</stats_W_nb_products>
 </config>

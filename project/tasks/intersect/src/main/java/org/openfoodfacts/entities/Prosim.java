@@ -46,7 +46,7 @@ public class Prosim extends BaseEntity {
     private LinkedTreeMap nutriments;
     private Double nova_group;
     private LinkedTreeMap images;
-    private Float nutrition_score_uk;
+    private String nutrition_grades;
     private Short score;
     private HashMap<Short, HashMap<Short, String[]>> similarity;
 
@@ -66,7 +66,7 @@ public class Prosim extends BaseEntity {
         this.nutriments = (LinkedTreeMap) prodExt.getNutriments();
         this.nova_group = prodExt.getNova_group();
         this.images = (LinkedTreeMap) prodExt.getImages();
-        this.nutrition_score_uk = prodExt.getNutrition_score_uk();
+        this.nutrition_grades = prodExt.getNutritionGrades();
         this.score = prodExt.getScore();
         // similarity section
         this.similarity = new HashMap<>();
@@ -139,12 +139,12 @@ public class Prosim extends BaseEntity {
         this.nova_group = nova_group;
     }
 
-    public Float getNutrition_score_uk() {
-        return this.nutrition_score_uk;
+    public String getNutrition_score_uk() {
+        return this.nutrition_grades;
     }
 
-    public void setNutrition_score_uk(Float nutrition_score_uk) {
-        this.nutrition_score_uk = nutrition_score_uk;
+    public void setNutrition_score_uk(String nutrition_grades) {
+        this.nutrition_grades = nutrition_grades;
     }
 
     public Short getScore() {

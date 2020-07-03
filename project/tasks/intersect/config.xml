@@ -19,7 +19,7 @@
     <path_to_root>../..</path_to_root>
     <path_to_logfile_name>logs/log_intersecter.log</path_to_logfile_name>
     <!-- stop intersect-process when the number of data-packages in incoming directory is equal to this number -->
-    <stop_when_min_data_reached>2</stop_when_min_data_reached>
+    <stop_when_min_data_reached>1</stop_when_min_data_reached>
     <!-- <path_absolute_incoming_data>/home/olivier/_developpement/off_boinc_dev/boinc_server/data_incoming</path_absolute_incoming_data>-->
     <path_to_incoming_data>outputs/preparer/</path_to_incoming_data>
     <!-- no need output !!

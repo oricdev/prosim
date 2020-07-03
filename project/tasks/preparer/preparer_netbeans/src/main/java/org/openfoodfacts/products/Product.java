@@ -16,7 +16,7 @@ import java.util.List;
 
 public class Product implements IProduct {
 
-    public Product(String _id, String code, String product_name, String pnns_groups_1, List<String> countries_tags, List<String> categories_tags, List<String> ingredients_tags, List<String> brands_tags, List<String> stores_tags, Object languages_codes, Object nutriments, Double nova_group, Object images, Float nutrition_score_uk) {
+    public Product(String _id, String code, String product_name, String pnns_groups_1, List<String> countries_tags, List<String> categories_tags, List<String> ingredients_tags, List<String> brands_tags, List<String> stores_tags, Object languages_codes, Object nutriments, Double nova_group, Object images, String nutrition_grades) {
         this.code = code;
         this.product_name = product_name;
         this.pnns_groups_1 = pnns_groups_1;
@@ -29,7 +29,7 @@ public class Product implements IProduct {
         this.nutriments = nutriments;
         this.nova_group = nova_group;
         this.images = images;
-        this.nutrition_score_uk = nutrition_score_uk;
+        this.nutrition_grades = nutrition_grades;
         this._id = _id;
     }
 
@@ -45,7 +45,7 @@ public class Product implements IProduct {
     protected Object nutriments;
     protected Double nova_group;
     protected Object images;
-    protected Float nutrition_score_uk;
+    protected String nutrition_grades;
     protected String _id;
     
     
@@ -53,8 +53,8 @@ public class Product implements IProduct {
     * Extracts info from nutriments
     */
     public void prepare() {
-        if (null != this.getNutriments() && ((LinkedTreeMap)this.getNutriments()).containsKey("nutrition-score-uk") ) {
-            this.nutrition_score_uk = Float.parseFloat(((LinkedTreeMap)this.getNutriments()).get("nutrition-score-uk").toString());
+        if (null != this.getNutriments() && ((LinkedTreeMap)this.getNutriments()).containsKey("nutrition_grades") ) {
+            this.nutrition_grades = ((LinkedTreeMap)this.getNutriments()).get("nutrition_grades").toString();
         }
     }
 
@@ -122,12 +122,12 @@ public class Product implements IProduct {
         this.nova_group = nova_group;
     }
 
-    public Float getNutrition_score_uk() {
-        return this.nutrition_score_uk;
+    public String getNutritionGrades() {
+        return this.nutrition_grades;
     }
 
-    public void setNutrition_score_uk(Float nutrition_score_uk) {
-        this.nutrition_score_uk = nutrition_score_uk;
+    public void setNutritionGrades(String nutrition_grades) {
+        this.nutrition_grades = nutrition_grades;
     }
 
     public List<String> getStores_tags() {

@@ -1,6 +1,6 @@
 /*
  * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
- * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
+ * by pairs based on their score (Nutrition Grade, Nova Classification, etc.).
  * Results are stored in a Mongo-Database.
  *
  * Url: https://offmatch.blogspot.com/

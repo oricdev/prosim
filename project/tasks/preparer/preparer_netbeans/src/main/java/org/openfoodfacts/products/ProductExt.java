@@ -24,7 +24,7 @@ public class ProductExt extends Product implements IProduct {
     protected Short other_score = null;
 
     public ProductExt(Product product) throws Exception {
-        super(product.getId(), product.getCode(), product.getProduct_name(), product.getPnns_groups_1(), product.getCountries_tags(), product.getCategories_tags(), product.getIngredients_tags(), product.getBrands_tags(), product.getStores_tags(), product.getLanguages_codes(), product.getNutriments(), product.getNova_group(), product.getImages(), product.getNutrition_score_uk());
+        super(product.getId(), product.getCode(), product.getProduct_name(), product.getPnns_groups_1(), product.getCountries_tags(), product.getCategories_tags(), product.getIngredients_tags(), product.getBrands_tags(), product.getStores_tags(), product.getLanguages_codes(), product.getNutriments(), product.getNova_group(), product.getImages(), product.getNutritionGrades());
         //this.computeScore();
     }
 

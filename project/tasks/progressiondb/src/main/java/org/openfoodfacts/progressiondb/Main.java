@@ -38,8 +38,6 @@ public class Main {
     // Tags in progress.xml file
     final static String PROGRESS_LAST_CODE_ALL_PRODUCTS = "last_intersect_code_all_products";
     final static String PROGRESS_LAST_CODE_UPDATED_PRODUCTS = "last_intersect_code_to_be_inserted";
-    // <!-- todo: remove this below when preparer.config.xml ok -->
-    final static String TASK_PREPARER_MATRIX_HEIGHT = "task_preparer_matrix_height";
 
     /**
      * computes progression based on barcode width/height stored in
@@ -54,8 +52,7 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException, IOException {
         String dbName = CfgMgr.getConf(CONF_DB_NAME);
         System.out.println("computing progression of database <" + dbName + ">");
-        // <!-- todo: remove this below when preparer.config.xml ok -->
-        long matrix_height = Long.valueOf(CfgMgr.getConf(TASK_PREPARER_MATRIX_HEIGHT));
+
         // read progress.xml file to get data about the last extracted file (last intersection block created)
         // ..last barcode in ALL products processed in previous batch (w=width in Matrix)
         String last_code_w = getProgress(PROGRESS_LAST_CODE_ALL_PRODUCTS);
@@ -68,12 +65,8 @@ public class Main {
         String path_json_matrix_h = CfgMgr.getConf(CONF_PATH_TO_ROOT) + "/" + CfgMgr.getConf(CONF_OUT_PATH_FEEDERS) + "/" + CfgMgr.getConf(CONF_OUT_HEIGHT_DIMENSION_PRODUCTS);
         Tuple<Long, Long> position_w = getCursorPositionInJsonMatrix(path_json_matrix_w, last_code_w);
         Tuple<Long, Long> position_h = getCursorPositionInJsonMatrix(path_json_matrix_h, last_code_h);
-        float progression = 0;
-        if (position_h.x > matrix_height) {
-            progression = (Float.valueOf((position_h.x - matrix_height) * position_w.y) + Float.valueOf(matrix_height * position_w.x)) / (Float.valueOf(position_w.y * position_h.y)) * 100;
-        } else {
-            progression = (Float.valueOf(position_h.x * position_w.y) ) / (Float.valueOf(position_w.y * position_h.y)) * 100;
-        }
+        float progression = (Float.valueOf(position_h.x * position_w.y) ) / (Float.valueOf(position_w.y * position_h.y)) * 100;
+
         //float progression = (Float.valueOf(position_w.x * position_h.x)) / (Float.valueOf(position_w.y * position_h.y)) * 100;
         System.out.println("all_products     :: position = " + position_w.x + " / " + position_w.y);
         System.out.println("updated_products :: position = " + position_h.x + " / " + position_h.y);

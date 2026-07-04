@@ -13,8 +13,12 @@ package org.openfoodfacts.utils;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+<<<<<<< HEAD
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
+=======
+import com.mongodb.client.MongoCollection;
+>>>>>>> d6b6f4d (dockerisation du feeder)
 import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.openfoodfacts.computers.ProductComputer;
@@ -149,7 +153,11 @@ public class JsonTools {
         }
     }
 
+<<<<<<< HEAD
     public static void writeJsonStreamWithMongoCursor(String dname, String fname, FindIterable<Document> cursorProducts) {
+=======
+    public static void writeJsonStreamWithMongoCursor(String dname, String fname, MongoCollection<Document> cursorProducts) {
+>>>>>>> d6b6f4d (dockerisation du feeder)
         FileOutputStream ostr_products = null;
         String full_fname = dname + File.separator + fname;
 
@@ -181,6 +189,10 @@ public class JsonTools {
                 logProgressStep = Integer.parseInt(strLogProgressStep);
             }
 
+<<<<<<< HEAD
+=======
+            logger.info("saving " + cursorProducts.count() + " product(s) in '" + full_fname + "'");
+>>>>>>> d6b6f4d (dockerisation du feeder)
             ostr_products = new FileOutputStream(dname + File.separator + fname);
             JsonWriter writer = new JsonWriter(new OutputStreamWriter(ostr_products, "UTF-8"));
             writer.setIndent("  ");
@@ -193,6 +205,7 @@ public class JsonTools {
             int counter_valid = 0;
             int counter_invalid = 0;
 
+<<<<<<< HEAD
             try (MongoCursor<Document> productIterator = cursorProducts.iterator()) {
                 while (productIterator.hasNext()) {
                     Document mongoDocument = productIterator.next();
@@ -273,6 +286,84 @@ public class JsonTools {
                         if (maxProducts > 0 && counter_valid > maxProducts) break;
                     }
                     counter++;
+=======
+            for (Iterator<Document> productIterator = cursorProducts.find().iterator(); productIterator.hasNext(); counter++) {
+                Document mongoDocument = productIterator.next();
+
+                categories_tags = (List<String>) mongoDocument.get("categories_tags");
+                if (null == mongoDocument.get("_id") || mongoDocument.get("_id").toString().equals("3538280839333") || mongoDocument.get("_id").toString().equals("9310140282602") || null == mongoDocument.get("code") || null == categories_tags || !mongoDocument.containsKey("pnns_groups_1")) {
+                    counter_invalid++;
+                } else {
+                    id = (String) mongoDocument.get("_id").toString();
+                    code = (String) mongoDocument.get("code").toString();
+                    product_name = (String) mongoDocument.get("product_name");
+                    pnns_groups_1 = (String) mongoDocument.get("pnns_groups_1");
+
+                    if (mongoDocument.containsKey("countries_tags")) {
+                        countries_tags = (List<String>) mongoDocument.get("countries_tags");
+                    } else {
+                        countries_tags = null;
+                    }
+
+                    if (mongoDocument.containsKey("brands_tags")) {
+                        brands_tags = (List<String>) mongoDocument.get("brands_tags");
+                    } else {
+                        brands_tags = null;
+                    }
+
+                    if (mongoDocument.containsKey("stores_tags")) {
+                        stores_tags = (List<String>) mongoDocument.get("stores_tags");
+                    } else {
+                        stores_tags = null;
+                    }
+
+                    if (mongoDocument.containsKey("ingredients_tags")) {
+                        ingredients_tags = (List<String>) mongoDocument.get("ingredients_tags");
+                    } else {
+                        ingredients_tags = null;
+                    }
+
+                    if (mongoDocument.containsKey("languages_codes")) {
+                        languages_codes = mongoDocument.get("languages_codes");
+                    } else {
+                        languages_codes = null;
+                    }
+
+                    nutriments = mongoDocument.get("nutriments");
+
+                    if (mongoDocument.containsKey("nova_group")) {
+                        nova_group_as_string = (String) mongoDocument.get("nova_group").toString();
+                        if (nova_group_as_string != null) {
+                            nova_group = new Double(nova_group_as_string);
+                            //                            if (Double.isNaN(nova_group) || Double.isInfinite(nova_group)) {
+                            //                            	nova_group = null;
+                            //                            }
+                        }
+                    } else {
+                        nova_group = null;
+                    }
+
+                    if (mongoDocument.containsKey("images")) {
+                        images = mongoDocument.get("images");
+                    } else {
+                        images = null;
+                    }
+
+                    if (mongoDocument.containsKey("nutrition_grades")) {
+                        nutritionscore = (String) mongoDocument.get("nutrition_grades");
+                    } else {
+                        nutritionscore = null;
+                    }
+
+                    products product = new products(id, code, product_name, pnns_groups_1, countries_tags, categories_tags, ingredients_tags, brands_tags, stores_tags, languages_codes, nutriments, nova_group, images, nutritionscore);
+                    gson.toJson(product, Product.class, writer);
+                    counter_valid++;
+                    if (counter_valid % logProgressStep == 0) {
+                        logger.info(".." + counter_valid + " products exported..");
+                        writer.flush();
+                    }
+                    if (maxProducts > 0 && counter_valid > maxProducts) break;
+>>>>>>> d6b6f4d (dockerisation du feeder)
                 }
             }
 

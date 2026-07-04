@@ -59,7 +59,7 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // init log file: NOT WORKING with relative path?
         /* FileAppender f_appender = (FileAppender)Logger.getRootLogger().getAppender("file");
         String fname_log = CfgMgr.getConf(CONF_PATH_TO_ROOT).concat("/").concat(CfgMgr.getConf(CONF_PATH_LOGFILE_NAME));
@@ -111,14 +111,16 @@ public class Main {
     }
 
     private static String getProgress(String tag) {
-        return CfgMgr.readFromXml("progress.xml", tag);
+        String path_progress = System.getenv("PATH_PROGRESS_FILE");
+        return CfgMgr.readFromXml(path_progress, tag);
     }
 
     private static boolean setProgress(String tag, String a_value) {
-        return CfgMgr.updateXml("progress.xml", tag, a_value);
+        String path_progress = System.getenv("PATH_PROGRESS_FILE");
+        return CfgMgr.updateXml(path_progress, tag, a_value);
     }
 
-    private static int getNbSlots() {
+    private static int getNbSlots() throws IOException {
         int max_slots_allowed = Integer.valueOf(CfgMgr.getConf(CONF_MAX_OUTPUT_DATA));
         String srv = CfgMgr.getConf(CONF_PATH_TO_ROOT);
         String path_output = CfgMgr.getConf(CONF_PATH_OUT_PREPARER);

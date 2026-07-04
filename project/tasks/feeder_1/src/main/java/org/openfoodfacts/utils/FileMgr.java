@@ -1,5 +1,5 @@
 /*
- * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
  * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
  * Results are stored in a Mongo-Database.
  *
@@ -10,6 +10,8 @@
  */
 package org.openfoodfacts.utils;
 
+import org.apache.log4j.Logger;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -17,9 +19,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-
-import org.apache.log4j.Logger;
-
 import java.util.logging.Level;
 
 
@@ -52,33 +51,36 @@ public class FileMgr {
     }
 
     /**
+     *
      * @param dirpath
      * @param fileType
      * @return
      */
-    public static File[] getAllFilesInDirectory(String dirpath, EnumFileType fileType) throws IOException {
+    public static File[] getAllFilesInDirectory(String dirpath, EnumFileType fileType) {
         File directory = null;
         File[] paths = null;
 
-        directory = new File(dirpath);
-        if (!directory.isDirectory()) {
-            logger.error("cannot list content of '" + dirpath + "' since it is NOT a directory!");
-            logger.error("Process aborted!");
-            throw new IOException("cannot list content of '" + dirpath + "' since it is NOT a directory!");
-        } else {
-            FileFilter filter = (File pathname) -> fileType.equals(EnumFileType.DIRECTORY) ? pathname.isDirectory() : pathname.isFile();
-            paths = directory.listFiles(filter);
+        try {
+            directory = new File(dirpath);
+            if (!directory.isDirectory()) {
+                logger.error("cannot list content of '" + dirpath + "' since it is NOT a directory!");
+                logger.error("Process aborted!");
+            } else {
+                FileFilter filter = (File pathname) -> fileType.equals(EnumFileType.DIRECTORY) ? pathname.isDirectory() : pathname.isFile();
+                paths = directory.listFiles(filter);
+            }
+        } catch (Exception ex) {
         }
-
         return paths;
     }
 
     /**
+     *
      * @param dirpath
      * @param min_datasets
      * @return
      */
-    public static File getOldestDataset(String dirpath, int min_datasets) throws IOException {
+    public static File getOldestDataset(String dirpath, int min_datasets) {
         File oldestDataset = null;
         File[] dataSets = FileMgr.getAllFilesInDirectory(dirpath, EnumFileType.DIRECTORY);
         if (null != dataSets && dataSets.length >= min_datasets) {
@@ -117,8 +119,8 @@ public class FileMgr {
     }
 
     /*
-     * Retrieved from:
-     * https://stackoverflow.com/questions/3775694/deleting-folder-from-java
+    * Retrieved from:
+    * https://stackoverflow.com/questions/3775694/deleting-folder-from-java
      */
     protected static boolean deleteDirectory(File directory) {
         if (directory.exists()) {

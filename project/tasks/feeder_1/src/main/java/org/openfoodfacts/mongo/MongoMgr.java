@@ -1,5 +1,5 @@
 /*
- * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products
  * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
  * Results are stored in a Mongo-Database.
  *
@@ -8,185 +8,392 @@
  * License: GNU Affero General Public License v3.0
  * License url: https://github.com/oricdev/prosim/blob/master/LICENSE
  */
+package org.openfoodfacts.utils;
 
- /*
- * useful links here:
- * https://docs.mongodb.com/manual/tutorial/
- * Indexes: https://stackoverflow.com/questions/44413520/how-to-make-indexes-and-different-unique-indexes-in-morphia-java
- * Morphia API: http://mongodb.github.io/morphia/
- */
- /*
- * useful links:
- * querying with Morphia: http://mongodb.github.io/morphia/1.0/guides/querying/
- */
-package org.openfoodfacts.mongo;
-
-import com.mongodb.Mongo;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.mongodb.client.FindIterable;
-import org.bson.Document;
-import com.mongodb.client.MongoCollection;
-import org.openfoodfacts.entities.Prosim;
+import com.mongodb.client.MongoCursor;
 import org.apache.log4j.Logger;
 import org.bson.Document;
-import org.mongodb.morphia.Datastore;
-import org.mongodb.morphia.Morphia;
-import org.mongodb.morphia.query.Query;
+import org.openfoodfacts.computers.ProductComputer;
+import org.openfoodfacts.databases.ProsimDb;
+import org.openfoodfacts.products.IProduct;
+import org.openfoodfacts.products.Product;
+import org.openfoodfacts.products.ProductExt;
 import org.openfoodfacts.products.products;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.*;
 
-public class MongoMgr {
+public class JsonTools {
 
-    final static Logger logger = Logger.getLogger(MongoMgr.class);
-    static EnumMongoImportMode importMode = null;
-    static String host = null;
-    static int port = -1;
-    static String dbname = null;
-    static String login = null;
-    static String pwd = null;
-    static MongoClient mongo = null;
-    static Datastore ds = null;
-    static Morphia morphia = null;
+    final static Logger logger = Logger.getLogger(JsonTools.class);
 
-    public static void connect() {
-        if (MongoMgr.mongo == null) {
-            logger.error("Connection was reset and don't know which host, port, database to connect to.");
-        } else {
-            MongoMgr.ds = MongoMgr.morphia.createDatastore(MongoMgr.mongo, MongoMgr.dbname);
+    public static List<Product> readJsonStream(InputStream in) throws Exception {
+        List<Product> products = new ArrayList<>();
+
+        JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+        reader.beginArray();
+        Gson gson = new Gson();
+        while (reader.hasNext()) {
+            Product product = gson.fromJson(reader, Product.class);
+            // Apply filter to decide whether one product is kept for comparison or not
+            if (ProductComputer.filter(new ProductExt(product))) {
+                product.prepare();
+                products.add(product);
+            }
+        }
+        reader.endArray();
+        reader.close();
+
+        return products;
+    }
+
+    public static List<ProsimDb> readJsonStreamForDbs(InputStream in) throws Exception {
+        List<ProsimDb> dbs = new ArrayList<>();
+        try {
+            JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+            reader.beginArray();
+            Gson gson = new Gson();
+            while (reader.hasNext()) {
+                ProsimDb oneDb = gson.fromJson(reader, ProsimDb.class);
+                dbs.add(oneDb);
+            }
+            reader.endArray();
+            reader.close();
+        } catch (IOException ioe) {
+
+        }
+        return dbs;
+    }
+
+    /*
+    returns (x,y) where:
+    - x = position of barcodeToFind in the InputStream of JSON file (initialized to 0)
+    - y = overall number of barcodes in the InputStream of JSON file
+     */
+    public static Tuple<Long, Long> findBarcodeInJsonStream(String barcodeToFind, InputStream in) throws UnsupportedEncodingException, IOException {
+        Tuple<Long, Long> positionBarcode;
+        long pos = 0;
+        long total = 0;
+
+        JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+        reader.beginArray();
+        Gson gson = new Gson();
+        while (reader.hasNext()) {
+            Product product = gson.fromJson(reader, Product.class);
+            if (pos == 0 && product.getCode().equals(barcodeToFind)) {
+                // If just found
+                pos = total;
+            }
+            total++;
+        }
+        reader.endArray();
+        reader.close();
+
+        positionBarcode = new Tuple<>(pos, total);
+        return positionBarcode;
+    }
+
+    public static void writeJsonStream(String dname, String fname, List<IProduct> products) {
+        FileOutputStream ostr_products = null;
+        String full_fname = dname + File.separator + fname;
+        try {
+            if (products != null) {
+                logger.info("saving " + products.size() + " product(s) in '" + full_fname + "'");
+            }
+            ostr_products = new FileOutputStream(dname + File.separator + fname);
+            JsonWriter writer = new JsonWriter(new OutputStreamWriter(ostr_products, "UTF-8"));
+            writer.setIndent("  ");
+            writer.beginArray();
+            Gson gson = new Gson();
+            for (IProduct product : products) {
+                if (product.getClass().equals(Product.class)) {
+                    gson.toJson(product, Product.class, writer);
+                } else if (product.getClass().equals(ProductExt.class)) {
+                    gson.toJson(product, ProductExt.class, writer);
+                }
+            }
+            writer.endArray();
+            writer.close();
+        } catch (IOException ex) {
+            logger.error("could not write out matrix data file '" + full_fname + "'");
         }
     }
 
-    public static void connect(String host, int port, String login, String pwd, String dbname, String mode, boolean ensureIndexes) {
-        if (mode.isEmpty()) {
-            MongoMgr.importMode = EnumMongoImportMode.QUICK_INIT;
-        } else {
-            MongoMgr.importMode = EnumMongoImportMode.valueOf(mode);
-        }
-        logger.info("****************************************************");
-        logger.info("Mongo Import Mode has been set to <" + mode + ">");
-        logger.info("****************************************************");
-        MongoMgr.host = host;
-        MongoMgr.port = port;
-        MongoMgr.login = login;
-        MongoMgr.pwd = pwd;
-        MongoMgr.dbname = dbname;
-        StringBuilder mongo_connect_string = new StringBuilder("mongodb://");
-        if (!login.equals("") && !pwd.equals("")) {
-            mongo_connect_string.append(login).append(":").append(pwd).append("@");
-        }
-        mongo_connect_string.append(host).append("/").append(dbname);
-        if (port > 0) {
-            MongoMgr.mongo = new MongoClient(new MongoClientURI(mongo_connect_string.toString() + ":" + port));
-        } else {
-            MongoMgr.mongo = new MongoClient(new MongoClientURI(mongo_connect_string.toString()));
-        }
-
-        MongoMgr.morphia = new Morphia();
-        MongoMgr.ds = MongoMgr.morphia.createDatastore(MongoMgr.mongo, MongoMgr.dbname);
-
-        MongoMgr.morphia.mapPackage("org.openfoodfacts.entities");
-        if (ensureIndexes) {
-            // create indexes if unavailable
-            MongoMgr.ds.ensureIndexes();
+    public static void writeJsonStreamForDbs(String dname, String fname, List<ProsimDb> prosimDbs) {
+        FileOutputStream ostr_prosim_dbs = null;
+        String full_fname = dname + File.separator + fname;
+        try {
+            if (prosimDbs != null) {
+                logger.info("saving " + prosimDbs.size() + " Prosim-Db(s) in '" + full_fname + "'");
+            }
+            ostr_prosim_dbs = new FileOutputStream(dname + File.separator + fname);
+            JsonWriter writer = new JsonWriter(new OutputStreamWriter(ostr_prosim_dbs, "UTF-8"));
+            writer.setIndent("  ");
+            writer.beginArray();
+            Gson gson = new Gson();
+            for (ProsimDb dbProsim : prosimDbs) {
+                gson.toJson(dbProsim, ProsimDb.class, writer);
+            }
+            writer.endArray();
+            writer.close();
+        } catch (IOException ex) {
+            logger.error("could not write out Statistics file '" + full_fname + "'");
         }
     }
 
-    public static void disconnect() {
-        MongoMgr.mongo.close();
-        MongoMgr.ds = null;
-    }
+    public static void writeJsonStreamWithMongoCursor(String dname, String fname, FindIterable<Document> cursorProducts) {
+        FileOutputStream ostr_products = null;
+        String full_fname = dname + File.separator + fname;
 
-    public static boolean existsDb() {
-        // WARNING: use MongoClient if authentication is required! (cf. http://www.mkyong.com/mongodb/java-mongodb-hello-world-example/)
-        List<String> dbs = MongoMgr.mongo.getDatabaseNames();
-        boolean exists = dbs == null ? false : dbs.contains(dbname);
-        if (!exists) {
-            logger.debug("db <" + dbname + "> does not exist! Existing dbs are " + dbs.toString());
+        String id = null;
+        String code = null;
+        String product_name = null;
+        String pnns_groups_1 = null;
+        List<String> countries_tags = null;
+        List<String> categories_tags = null;
+        List<String> ingredients_tags = null;
+        List<String> brands_tags = null;
+        List<String> stores_tags = null;
+        Object languages_codes = null;
+        Object nutriments = null;
+        String nova_group_as_string = null;
+        Double nova_group = null;
+        Object images = null;
+        String nutritionscore = null;
+        int maxProducts = 0;
+        int logProgressStep = 1000;
+
+        try {
+            String strMaxProducts = System.getenv("MAX_PRODUCTS");
+            if (null != strMaxProducts && !strMaxProducts.isEmpty()) {
+                maxProducts = Integer.parseInt(strMaxProducts);
+            }
+            String strLogProgressStep = System.getenv("LOG_PROGRESS_STEP");
+            if (null != strLogProgressStep && !strLogProgressStep.isEmpty()) {
+                logProgressStep = Integer.parseInt(strLogProgressStep);
+            }
+
+            ostr_products = new FileOutputStream(dname + File.separator + fname);
+            JsonWriter writer = new JsonWriter(new OutputStreamWriter(ostr_products, "UTF-8"));
+            writer.setIndent("  ");
+            writer.beginArray();
+            Gson gson = new Gson();
+
+            // note: problem with Morphia mapping by reading, so this is the tedious part where we read each Document,
+            // .. map it into a "dbs" object, and output it in the file into a file after JSON conversion
+            int counter = 0;
+            int counter_valid = 0;
+            int counter_invalid = 0;
+
+            try (MongoCursor<Document> productIterator = cursorProducts.iterator()) {
+                while (productIterator.hasNext()) {
+                    Document mongoDocument = productIterator.next();
+
+                    categories_tags = (List<String>) mongoDocument.get("categories_tags");
+                    if (null == mongoDocument.get("_id") || mongoDocument.get("_id").toString().equals("3538280839333") || mongoDocument.get("_id").toString().equals("9310140282602") || null == mongoDocument.get("code") || null == categories_tags || !mongoDocument.containsKey("pnns_groups_1")) {
+                        counter_invalid++;
+                    } else {
+                        id = (String) mongoDocument.get("_id").toString();
+                        code = (String) mongoDocument.get("code").toString();
+                        product_name = (String) mongoDocument.get("product_name");
+                        pnns_groups_1 = (String) mongoDocument.get("pnns_groups_1");
+
+                        if (mongoDocument.containsKey("countries_tags")) {
+                            countries_tags = (List<String>) mongoDocument.get("countries_tags");
+                        } else {
+                            countries_tags = null;
+                        }
+
+                        if (mongoDocument.containsKey("brands_tags")) {
+                            brands_tags = (List<String>) mongoDocument.get("brands_tags");
+                        } else {
+                            brands_tags = null;
+                        }
+
+                        if (mongoDocument.containsKey("stores_tags")) {
+                            stores_tags = (List<String>) mongoDocument.get("stores_tags");
+                        } else {
+                            stores_tags = null;
+                        }
+
+                        if (mongoDocument.containsKey("ingredients_tags")) {
+                            ingredients_tags = (List<String>) mongoDocument.get("ingredients_tags");
+                        } else {
+                            ingredients_tags = null;
+                        }
+
+                        if (mongoDocument.containsKey("languages_codes")) {
+                            languages_codes = mongoDocument.get("languages_codes");
+                        } else {
+                            languages_codes = null;
+                        }
+
+                        nutriments = mongoDocument.get("nutriments");
+
+                        if (mongoDocument.containsKey("nova_group")) {
+                            nova_group_as_string = (String) mongoDocument.get("nova_group").toString();
+                            if (nova_group_as_string != null) {
+                                nova_group = new Double(nova_group_as_string);
+                                //                            if (Double.isNaN(nova_group) || Double.isInfinite(nova_group)) {
+                                //                            	nova_group = null;
+                                //                            }
+                            }
+                        } else {
+                            nova_group = null;
+                        }
+
+                        if (mongoDocument.containsKey("images")) {
+                            images = mongoDocument.get("images");
+                        } else {
+                            images = null;
+                        }
+
+                        if (mongoDocument.containsKey("nutrition_grades")) {
+                            nutritionscore = (String) mongoDocument.get("nutrition_grades");
+                        } else {
+                            nutritionscore = null;
+                        }
+
+                        products product = new products(id, code, product_name, pnns_groups_1, countries_tags, categories_tags, ingredients_tags, brands_tags, stores_tags, languages_codes, nutriments, nova_group, images, nutritionscore);
+                        gson.toJson(product, Product.class, writer);
+                        counter_valid++;
+                        if (counter_valid % logProgressStep == 0) {
+                            logger.info(".." + counter_valid + " products exported..");
+                            writer.flush();
+                        }
+
+                        if (maxProducts > 0 && counter_valid > maxProducts) break;
+                    }
+                    counter++;
+                }
+            }
+
+            writer.endArray();
+            writer.close();
+
+            logger.info("total number of records read in the mongo-Db: " + counter);
+            logger.info("number of candidate records to the intersect-process: " + counter_valid);
+            logger.info("number of invalid/ignored records due to missing information: " + counter_invalid);
+        } catch (IOException ex) {
+            logger.error("could not write out matrix data file '" + full_fname + "'");
+        } catch (IllegalArgumentException iaex) {
+            logger.error(iaex.getClass().toString() + " for _id = " + id);
         }
-        return exists;
     }
 
-    public static double getDbSize() {
-        if (MongoMgr.ds.getDB().getStats().containsField("fileSize")) {
-            return Double.valueOf(MongoMgr.ds.getDB().getStats().get("fileSize").toString());
+    public static Tuple<List<IProduct>, List<IProduct>> extractOneCellMatrix(String code_h, String code_w, String fullpath_all_products, int width, String fullpath_updated_products, int height) {
+        //        long h_stats_nb_read = 0;
+        //        long w_stats_nb_read = 0;
+        List<IProduct> h_products = new ArrayList<>();
+        List<IProduct> w_products = new ArrayList<>();
+        // Get a matrix/tuple of dbs
+
+        try {
+            // ..start with vertical (Height=h)
+            FileInputStream istr_updated_products = new FileInputStream(fullpath_updated_products);
+            Tuple<Long, List<IProduct>> h_tuple = JsonTools.extractOneCellMatrixInOneDimension(istr_updated_products, code_h, height);
+            if (h_tuple == null) {
+                h_products = null;
+            } else {
+                //                h_stats_nb_read = h_tuple.x;
+                h_products = h_tuple.y;
+            }
+        } catch (FileNotFoundException fnfe) {
+            logger.error("could not find file " + fullpath_updated_products);
+            logger.error("Process aborted!");
         }
-        return 0;
-    }
 
-    public static void createDb(String host, int port, String dbname) {
-        Mongo mongo = new Mongo(host, port);
-        // if database doesn't exists, MongoDB will create it for you
-        mongo.getDB(dbname);
-        mongo.close();
-        logger.info("db <" + dbname + "> has been created.");
-    }
-
-    public static Prosim getProduct(String code) {
-        Prosim productInDb = MongoMgr.ds.createQuery(Prosim.class).field("code").equal(code).get();
-        return productInDb;
-    }
-
-    public static void saveProduct(Prosim product) {
-        MongoMgr.ds.save(product);
-    }
-
-    public static void deleteProduct(String code) {
-
-    }
-
-    public static void dropDb(String host, int port, String dbname) {
-        MongoClient mongo = new MongoClient(host, port);
-        mongo.dropDatabase(dbname);
-        mongo.close();
-        logger.debug("database <" + dbname + "> has been SUCCESSFULLY deleted.");
-    }
-
-    public static FindIterable<Document> getAllProductsWithFilter(String dbname, String dbcoll, String filter) {
-        FindIterable<Document> results = null;
-        MongoCollection<Document> mongoColl = MongoMgr.mongo.getDatabase(dbname).getCollection(dbcoll);
-        if (null != filter && !filter.isEmpty()) {
-            Document queryFilter = Document.parse(filter);
-            results = mongoColl.find(queryFilter);
-            logger.info("There are " +mongoColl.count(queryFilter) + " product(s) matching your FILTER <"+filter+">");
-        } else {
-            results=mongoColl.find();
-            logger.info("There are " +mongoColl.count() + " product(s) (no FILTER applies)");
+        if (h_products == null) {
+            // Code h was not found => error
+            return null;
         }
-        return results;
-    }
 
-    public static boolean existsProduct(String code) {
-        Query<Prosim> query = MongoMgr.ds.createQuery(Prosim.class);
-        query.and(
-                query.criteria("code").equal(code)
-        );
+        try {
+            // ..end with horizontal (Width=w)
+            FileInputStream istr_all_products = new FileInputStream(fullpath_all_products);
+            Tuple<Long, List<IProduct>> w_tuple = JsonTools.extractOneCellMatrixInOneDimension(istr_all_products, code_w, width);
+            if (w_tuple == null) {
+                w_products = null;
+            } else {
+                //                w_stats_nb_read = w_tuple.x;
+                w_products = w_tuple.y;
+            }
+        } catch (FileNotFoundException fnfe) {
+            logger.error("could not find file " + fullpath_all_products);
+            logger.error("Process aborted!");
+        }
+        if (w_products == null) {
+            // Code w was not found => error
+            return null;
+        }
 
-        return ds.getCount(query) > 0;
+        //        logger.info("**********************************************");
+        //        logger.info("S T A T I S T I C S");
+        //        logger.info("-------------------");
+        //        double stats_global_height = Long.valueOf(CfgMgr.getConf(Main.CONF_STATS_HEIGHT));
+        //        double stats_global_width = Long.valueOf(CfgMgr.getConf(Main.CONF_STATS_WIDTH));
+        //        double progress_percentage = (h_stats_nb_read * w_stats_nb_read) / (stats_global_height * stats_global_width) * 100;
+        //        logger.info("position of cursor WIDTH : " + w_stats_nb_read + " / " + stats_global_width);
+        //        logger.info("position of cursor HEIGTH: " + h_stats_nb_read + " / " + stats_global_height);
+        //        logger.info("--> overall PROGRESSION  : " + (new DecimalFormat("###.#####")).format(progress_percentage));
+        //        logger.info("**********************************************");
+        // writting statistics about overall progression
+        //String stats_fname = CfgMgr.getConf(CONF_PATH_TO_ROOT) + File.separator + File.separator + CfgMgr.getConf(Main.CONF_OUT_FNAME_STATS);
+        //Stats.outputInXml(stats_fname, w_stats_nb_read, stats_global_width, h_stats_nb_read, stats_global_height, progress_percentage);
+        Tuple<List<IProduct>, List<IProduct>> matrixProducts = new Tuple<>(w_products, h_products);
+        return matrixProducts;
     }
 
     /**
-     * Number of products in database
-     *
-     * @return
+     * @param in
+     * @param code
+     * @param length
+     * @return Long: used for stats for computing the percentage of progreesion:
+     * position of code related to the beginning of file List of length dbs
+     * starting just after code
      */
-    public static long getCountProducts_Prosim() {
-        Query<Prosim> query = MongoMgr.ds.createQuery(Prosim.class);
-        return MongoMgr.ds.getCount(query);
-    }
+    public static Tuple<Long, List<IProduct>> extractOneCellMatrixInOneDimension(InputStream in, String code, int length) {
+        List<IProduct> products = new ArrayList<>();
+        // If empty barcode, start adding dbs from the beginning; otherwise until found
+        boolean isCodeFound = code.equals("");
+        long nb_read = 0;
+        int nb_codes_added = 0;
 
-    public static double getStorageSize() throws ClassCastException {
-        return (Double) MongoMgr.ds.getDB().getStats().get("dataSize");
-    }
-    /**
-     * Number of products in database
-     *
-     * @return
-     */
-    public static long getCountProducts_products() {
-        Query<products> query = MongoMgr.ds.createQuery(products.class);
-        return MongoMgr.ds.getCount(query);
+        try {
+            JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+            reader.beginArray();
+            Gson gson = new Gson();
+            while (reader.hasNext() && nb_codes_added < length) {
+                Product product = gson.fromJson(reader, Product.class);
+                if (isCodeFound) {
+                    products.add(product);
+                    nb_codes_added++;
+                } else {
+                    isCodeFound = product.getCode().equals(code);
+                    // Handle exception for consistency (especially Height dimension) where code found is the first read => proceed with it as well and do not bypass
+                    if (isCodeFound && nb_read == 0) {
+                        products.add(product);
+                        nb_codes_added++;
+                    }
+                    nb_read++;
+                }
+            }
+            //reader.endArray();
+            reader.close();
+        } catch (IOException ioe) {
+            logger.error("error reading InputStream");
+        }
+        // return cell-matrix of dbs
+        Tuple<Long, List<IProduct>> result = new Tuple<>(nb_read, products);
+
+        return (!isCodeFound) ? null : result;
     }
 }

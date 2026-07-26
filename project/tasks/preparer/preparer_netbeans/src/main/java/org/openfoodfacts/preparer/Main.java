@@ -68,25 +68,46 @@ public class Main {
         
         logger.info("Process Preparer started..");
         logger.info("Log level is " + logger.getParent().getLevel().toString().toUpperCase());
-        // get available slots N on server => provide N new files
-        int nb_free_slots = getNbSlots();
-        logger.info("<"+nb_free_slots + "> new slots are available on the server");
 
-        // if nb_free_slots > 0 do prepare N files
-        if (nb_free_slots > 0) {
-            logger.info("creating " + nb_free_slots + " new files");
-
-            // prepare N files which are to be used on remote/local server in order to create work units
-            int nb_new_files = prepareNewFiles(nb_free_slots);
-            if (nb_new_files != nb_free_slots) {
-                logger.info(nb_free_slots + " free slots are available but ONLY " + nb_new_files + " data files were needed! All done!");
-            } else {
-                logger.info(nb_free_slots + " new files for Matrix.WIDTH and Matrix.Height were created successfully.");
-            }
-        } else {
-            logger.info("no need to create new files now.");
+        int nbSecondsSuspension = 300*1000;
+        String strNbSecondsSuspension = System.getenv("NB_SECONDS_SUSPENSION");
+        if (null != strNbSecondsSuspension && !strNbSecondsSuspension.isEmpty()) {
+            nbSecondsSuspension = Integer.parseInt(strNbSecondsSuspension)*1000;
         }
-        logger.info("Process Preparer finished.");
+
+        // get available slots N on server => provide N new files and suspend before looping
+        do {
+            try {
+                int nb_free_slots = getNbSlots();
+
+                logger.info("<" + nb_free_slots + "> new slots are available on the server");
+
+                // if nb_free_slots > 0 do prepare N files
+                if (nb_free_slots > 0) {
+                    logger.info("creating " + nb_free_slots + " new files");
+
+                    // prepare N files which are to be used on remote/local server in order to create work units
+                    int nb_new_files = prepareNewFiles(nb_free_slots);
+                    if (nb_new_files != nb_free_slots) {
+                        logger.info(nb_free_slots + " free slots are available but ONLY " + nb_new_files + " data files were needed! All done!");
+                    } else {
+                        logger.info(nb_free_slots + " new files for Matrix.WIDTH and Matrix.Height were created successfully.");
+                    }
+                } else {
+                    logger.info("no need to create new files now.");
+                }
+                logger.info("Process Preparer finished so far..");
+            } catch (RuntimeException rex) {
+                logger.error("Error occurred while reading config file..!");
+            }
+            logger.info("..SUSPENDING preparer for "+strNbSecondsSuspension+" seconds..");
+            try{
+            Thread.sleep(nbSecondsSuspension);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            logger.info("..STARTS AGAIN preparer..");
+        } while(true);
     }
 
     private static String getProgress(String tag) {

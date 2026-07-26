@@ -14,6 +14,7 @@ import com.mongodb.client.MongoCollection;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.openfoodfacts.mongo.MongoMgr;
+import com.mongodb.client.FindIterable;
 import org.openfoodfacts.utils.JsonTools;
 import org.openfoodfacts.utils.CfgMgr;
 import org.openfoodfacts.utils.FileMgr;
@@ -56,12 +57,14 @@ public class Main {
         logger.info("Process Feeder_1 started..");
         logger.info("Log level is " + logger.getParent().getLevel().toString().toUpperCase());
 
+        String mongoFilter = System.getenv("FILTER");
+
         Main.dbConnect();
 
         long nb_products = MongoMgr.getCountProducts_products();
         logger.info("Number of products in the Db = " + nb_products);
         // Read all products and store them into JSON file
-        MongoCollection<Document> cursor_products = MongoMgr.getAllProducts(CfgMgr.getConf(CONF_OFF_ORIG_DBNAME), CfgMgr.getConf(CONF_OFF_ORIG_DBCOLL));
+        FindIterable<Document> cursor_products = MongoMgr.getAllProductsWithFilter(CfgMgr.getConf(CONF_OFF_ORIG_DBNAME), CfgMgr.getConf(CONF_OFF_ORIG_DBCOLL), mongoFilter);
         String dir_path = CfgMgr.getConf(CONF_PATH_TO_ROOT) + "/" + CfgMgr.getConf(CONF_PATH_OUT_FEEDERS);
         String json_filename = CfgMgr.getConf(CONF_FILE_FEEDER);
         JsonTools.writeJsonStreamWithMongoCursor(dir_path, json_filename, cursor_products);

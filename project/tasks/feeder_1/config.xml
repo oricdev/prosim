@@ -11,7 +11,11 @@
  * -->
 <!-- mode = host | path wether accessing remote Boinc server (server_host) or local directory (server_path) -->
 <config mode="path">
+<<<<<<< Updated upstream
     <path_to_root>../..</path_to_root>
+=======
+    <path_to_root>..</path_to_root>
+>>>>>>> Stashed changes
     <path_to_logfile_name>logs/log_feeder_1.log</path_to_logfile_name>
     <out_path_feeders>/outputs/feeders</out_path_feeders>
     <out_feeder_filename>all_products.json</out_feeder_filename>

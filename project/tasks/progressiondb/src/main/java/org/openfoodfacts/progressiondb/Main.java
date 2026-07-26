@@ -1,6 +1,6 @@
 
 /*
- * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products
  * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
  * Results are stored in a Mongo-Database.
  *
@@ -14,16 +14,18 @@ package org.openfoodfacts.progressiondb;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
+import org.apache.log4j.Logger;
 import org.openfoodfacts.utils.JsonTools;
 import org.openfoodfacts.utils.CfgMgr;
 import org.openfoodfacts.utils.Tuple;
 
 /**
- *
  * This is not used anymore since it has been replaced by the dbStats task.
  */
 public class Main {
-
+    final static Logger logger = Logger.getLogger(org.openfoodfacts.progressiondb.Main.class);
+    
     // Tags in config.xml file
     final static String CONF_PATH_TO_ROOT = "path_to_root";
     final static String CONF_DB_NAME = "db_name";
@@ -51,28 +53,42 @@ public class Main {
      */
     public static void main(String[] args) throws FileNotFoundException, IOException {
         String dbName = CfgMgr.getConf(CONF_DB_NAME);
-        System.out.println("computing progression of database <" + dbName + ">");
+        int nbSecondsSuspension = 300 * 1000;
+        String strNbSecondsSuspension = System.getenv("NB_SECONDS_SUSPENSION");
+        if (null != strNbSecondsSuspension && !strNbSecondsSuspension.isEmpty()) {
+            nbSecondsSuspension = Integer.parseInt(strNbSecondsSuspension) * 1000;
+        }
 
-        // read progress.xml file to get data about the last extracted file (last intersection block created)
-        // ..last barcode in ALL products processed in previous batch (w=width in Matrix)
-        String last_code_w = getProgress(PROGRESS_LAST_CODE_ALL_PRODUCTS);
-        // ..last barcode of UPDATED products processed in previous batch (h=height in Matrix)
-        String last_code_h = getProgress(PROGRESS_LAST_CODE_UPDATED_PRODUCTS);
-        System.out.println("last_code_w [all_products.json] = " + last_code_w);
-        System.out.println("last_code_h [updated_products.json] = " + last_code_h);
+        do {
+            logger.info("computing progression of database <" + dbName + ">");
 
-        String path_json_matrix_w = CfgMgr.getConf(CONF_PATH_TO_ROOT) + "/" + CfgMgr.getConf(CONF_OUT_PATH_FEEDERS) + "/" + CfgMgr.getConf(CONF_OUT_WIDTH_DIMENSION_PRODUCTS);
-        String path_json_matrix_h = CfgMgr.getConf(CONF_PATH_TO_ROOT) + "/" + CfgMgr.getConf(CONF_OUT_PATH_FEEDERS) + "/" + CfgMgr.getConf(CONF_OUT_HEIGHT_DIMENSION_PRODUCTS);
-        Tuple<Long, Long> position_w = getCursorPositionInJsonMatrix(path_json_matrix_w, last_code_w);
-        Tuple<Long, Long> position_h = getCursorPositionInJsonMatrix(path_json_matrix_h, last_code_h);
-        float progression = (Float.valueOf(position_h.x * position_w.y) ) / (Float.valueOf(position_w.y * position_h.y)) * 100;
+            // read progress.xml file to get data about the last extracted file (last intersection block created)
+            // ..last barcode in ALL products processed in previous batch (w=width in Matrix)
+            String last_code_w = getProgress(PROGRESS_LAST_CODE_ALL_PRODUCTS);
+            // ..last barcode of UPDATED products processed in previous batch (h=height in Matrix)
+            String last_code_h = getProgress(PROGRESS_LAST_CODE_UPDATED_PRODUCTS);
+            logger.info("last_code_w [all_products.json] = " + last_code_w);
+            logger.info("last_code_h [updated_products.json] = " + last_code_h);
 
-        //float progression = (Float.valueOf(position_w.x * position_h.x)) / (Float.valueOf(position_w.y * position_h.y)) * 100;
-        System.out.println("all_products     :: position = " + position_w.x + " / " + position_w.y);
-        System.out.println("updated_products :: position = " + position_h.x + " / " + position_h.y);
-        System.out.println();
-        System.out.println("Progression of Database <" + dbName + "> is: " + progression + " %");
+            String path_json_matrix_w = CfgMgr.getConf(CONF_PATH_TO_ROOT) + "/" + CfgMgr.getConf(CONF_OUT_PATH_FEEDERS) + "/" + CfgMgr.getConf(CONF_OUT_WIDTH_DIMENSION_PRODUCTS);
+            String path_json_matrix_h = CfgMgr.getConf(CONF_PATH_TO_ROOT) + "/" + CfgMgr.getConf(CONF_OUT_PATH_FEEDERS) + "/" + CfgMgr.getConf(CONF_OUT_HEIGHT_DIMENSION_PRODUCTS);
+            Tuple<Long, Long> position_w = getCursorPositionInJsonMatrix(path_json_matrix_w, last_code_w);
+            Tuple<Long, Long> position_h = getCursorPositionInJsonMatrix(path_json_matrix_h, last_code_h);
+            float progression = (Float.valueOf(position_h.x * position_w.y)) / (Float.valueOf(position_w.y * position_h.y)) * 100;
 
+            //float progression = (Float.valueOf(position_w.x * position_h.x)) / (Float.valueOf(position_w.y * position_h.y)) * 100;
+            logger.info("all_products     :: position = " + position_w.x + " / " + position_w.y);
+            logger.info("updated_products :: position = " + position_h.x + " / " + position_h.y);
+            logger.info("");
+            logger.info("Progression of Database <" + dbName + "> is: " + progression + " %");
+            logger.info("..SUSPENDING <progressionDb> for " + strNbSecondsSuspension + " seconds..");
+            try {
+                Thread.sleep(nbSecondsSuspension);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            logger.info("..STARTS AGAIN <progressionDb>..");
+        } while (true);
     }
 
     private static String getProgress(String tag) {

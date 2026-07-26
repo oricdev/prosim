@@ -1,0 +1,43 @@
+# Répertoires de build (Maven, Gradle, etc.)
+target/
+build/
+out/
+dist/
+bin/
+*.class
+*.jar
+*.war
+*.ear
+
+# Fichiers de configuration IDE (IntelliJ, Eclipse, VSCode, etc.)
+*.iml
+*.ipr
+*.iws
+.eclipse/
+.classpath
+.project
+.settings/
+
+# Fichiers de logs et temporaires
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+# Fichiers de dépendances (Maven, Gradle)
+/vendor/
+/lib/
+/node_modules/
+
+# Fichiers de configuration locaux (ex: properties, YAML)
+*.local
+*.env
+application*.yml
+application*.properties
+
+# Fichiers générés par les outils de build
+/mvnw
+/mvnw.cmd
+/gradlew
+/gradlew.bat
+/gradle/

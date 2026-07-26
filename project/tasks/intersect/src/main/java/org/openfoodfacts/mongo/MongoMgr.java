@@ -1,5 +1,5 @@
 /*
- * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products
  * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
  * Results are stored in a Mongo-Database.
  *
@@ -9,13 +9,13 @@
  * License url: https://github.com/oricdev/prosim/blob/master/LICENSE
  */
 
- /*
+/*
  * useful links here:
  * https://docs.mongodb.com/manual/tutorial/
  * Indexes: https://stackoverflow.com/questions/44413520/how-to-make-indexes-and-different-unique-indexes-in-morphia-java
  * Morphia API: http://mongodb.github.io/morphia/
  */
- /*
+/*
  * useful links:
  * querying with Morphia: http://mongodb.github.io/morphia/1.0/guides/querying/
  */
@@ -25,7 +25,9 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
+
 import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.mongodb.morphia.Datastore;
@@ -74,12 +76,8 @@ public class MongoMgr {
         if (!login.equals("") && !pwd.equals("")) {
             mongo_connect_string.append(login).append(":").append(pwd).append("@");
         }
-        mongo_connect_string.append(host).append("/").append(dbname);
-        if (port > 0) {
-            MongoMgr.mongo = new MongoClient(new MongoClientURI(mongo_connect_string.toString() + ":" + port));
-        } else {
-            MongoMgr.mongo = new MongoClient(new MongoClientURI(mongo_connect_string.toString()));
-        }
+        mongo_connect_string.append(host).append(":").append(port).append("/").append(dbname);
+        MongoMgr.mongo = new MongoClient(new MongoClientURI(mongo_connect_string.toString()));
 
         MongoMgr.morphia = new Morphia();
         MongoMgr.ds = MongoMgr.morphia.createDatastore(MongoMgr.mongo, MongoMgr.dbname);
@@ -168,6 +166,7 @@ public class MongoMgr {
     public static double getStorageSize() throws ClassCastException {
         return (Double) MongoMgr.ds.getDB().getStats().get("dataSize");
     }
+
     /**
      * Number of products in database
      *

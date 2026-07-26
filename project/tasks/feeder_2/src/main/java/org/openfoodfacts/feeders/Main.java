@@ -25,12 +25,13 @@ import org.openfoodfacts.utils.CfgMgr;
 import org.openfoodfacts.utils.FileMgr;
 
 /**
- *
+ * NOT USED anymore within containers. Only feeder_1 is used and all_products.json is then fully copied into updated_products.json at the end of the feeder_1 process (see feeder_1::compose.yaml)
  * useful links: :gson: https://github.com/google/gson :gson api:
  * http://www.javadoc.io/doc/com.google.code.gson/gson/2.8.5 :gson sample
  * streaming: https://sites.google.com/site/gson/streaming :log4j:
  * https://www.mkyong.com/logging/log4j-hello-world-example/
  */
+@Deprecated
 public class Main {
 
     final static Logger logger = Logger.getLogger(org.openfoodfacts.feeders.Main.class);

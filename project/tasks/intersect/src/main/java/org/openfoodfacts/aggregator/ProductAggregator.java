@@ -1,5 +1,5 @@
 /*
- * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products
  * by pairs based on their score (Nutrition Grade, Nova Classification, etc.).
  * Results are stored in a Mongo-Database.
  *
@@ -9,7 +9,7 @@
  * License url: https://github.com/oricdev/prosim/blob/master/LICENSE
  */
 
- /*
+/*
  * Useful links:
  * - merge of HasMaps: //https://stackoverflow.com/questions/4299728/how-can-i-combine-two-hashmap-objects-containing-the-same-types
  *
@@ -24,52 +24,77 @@ package org.openfoodfacts.aggregator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.log4j.Logger;
 import org.openfoodfacts.entities.Prosim;
 
 
 public class ProductAggregator {
     final static Logger logger = Logger.getLogger(ProductAggregator.class);
-    
+
+    private int maxMatch100 = 0;
+    private int maxMatchBelow100 = 0;
+
     public HashMap<String, Prosim> products = new HashMap<>();
 
-    public void aggregate(Prosim other_prosim) {
-        String code_product = other_prosim.getCode();        
+    public ProductAggregator() {
+        String strMaxMatch100 = System.getenv("MAX_MATCH_100");
+        if (null != strMaxMatch100 && !strMaxMatch100.isEmpty()) {
+            this.maxMatch100 = Integer.parseInt(strMaxMatch100);
+        }
+        String strMaxMatchBelow100 = System.getenv("MAX_MATCH_BELOW_100");
+        if (null != strMaxMatchBelow100 && !strMaxMatchBelow100.isEmpty()) {
+            this.maxMatchBelow100 = Integer.parseInt(strMaxMatchBelow100);
+        }
+    }
+
+    public boolean aggregate(Prosim other_prosim) {
+        AtomicBoolean hasBeenTouched = new AtomicBoolean(false);
+        String code_product = other_prosim.getCode();
         if (!this.products.containsKey(code_product)) {
             // new entry
             this.products.put(code_product, other_prosim);
         } else {
             Prosim this_prosim = this.products.get(code_product);
-            HashMap<Short, HashMap<Short, String[]> > this_sim = this_prosim.getSimilarity();
-            HashMap<Short, HashMap<Short, String[]> > other_sim = other_prosim.getSimilarity();
-            
+            HashMap<Short, HashMap<Short, String[]>> this_sim = this_prosim.getSimilarity();
+            HashMap<Short, HashMap<Short, String[]>> other_sim = other_prosim.getSimilarity();
+
             // start aggregation (grouped by similarity percentage, and then by nurition-score
             other_sim.keySet().forEach((percentage) -> {
                 if (!this_sim.containsKey(percentage)) {
                     // add new similarity entry
+                    hasBeenTouched.set(true);
                     this_sim.put(percentage, new HashMap<>());
                 }
                 other_sim.get(percentage).keySet().forEach((score) -> {
                     HashMap<Short, String[]> this_grouped_scores = this_sim.get(percentage);
                     if (!this_grouped_scores.containsKey(score)) {
+                        hasBeenTouched.set(true);
                         this_grouped_scores.put(score, new String[]{});
                     }
                     // Add to this current similarity all product codes found in other similarity per percentage and nutrition-score
-                    Arrays.asList(other_sim.get(percentage).get(score)).forEach((other_code)-> {
-                            String[] t_codes = this_grouped_scores.get(score);
-                            ArrayList<String> existing_codes = new ArrayList<>(Arrays.asList(t_codes));
-                            if (!existing_codes.contains(other_code)) {
-                                existing_codes.add(other_code);
-                                // replace array of codes
-                                this_grouped_scores.put(score, existing_codes.stream().toArray(String[]::new));
-                            }
-                        });
-                    this_sim.put(percentage, this_grouped_scores);                            
+                    // Apply max matches limits for 100% and below 100% if set
+                    Arrays.asList(other_sim.get(percentage).get(score)).forEach((other_code) -> {
+                        String[] t_codes = this_grouped_scores.get(score);
+                        ArrayList<String> existing_codes = new ArrayList<>(Arrays.asList(t_codes));
+                        if (!existing_codes.contains(other_code) && ((percentage == 100 && (maxMatch100 == 0 || existing_codes.size() < maxMatch100))
+                                || (percentage < 100 && (maxMatchBelow100 == 0 || existing_codes.size() < maxMatchBelow100)))) {
+                            existing_codes.add(other_code);
+                            // replace array of codes
+                            hasBeenTouched.set(true);
+                            this_grouped_scores.put(score, existing_codes.stream().toArray(String[]::new));
+                        }
+                    });
+                    if (hasBeenTouched.get()) {
+                        this_sim.put(percentage, this_grouped_scores);
+                    }
                 });
             });
             this_prosim.setSimilarity(this_sim);
             this_prosim.setId(other_prosim.getId());
             this.products.put(code_product, this_prosim);
         }
+        return hasBeenTouched.get();
     }
 }

@@ -16,7 +16,7 @@
     <!--similarity_min_percentage>60</similarity_min_percentage-->
     <!-- Import modes into Mongo-Db: QUICK_INIT or FULL_CHECK_UPDATE -->
     <mongo_import_mode>QUICK_INIT</mongo_import_mode>
-    <path_to_root>../..</path_to_root>
+    <path_to_root>..</path_to_root>
     <path_to_logfile_name>logs/log_intersecter.log</path_to_logfile_name>
     <!-- stop intersect-process when the number of data-packages in incoming directory is equal to this number -->
     <stop_when_min_data_reached>1</stop_when_min_data_reached>
@@ -33,8 +33,8 @@
     <off_dest_pwd></off_dest_pwd> -->
     
     <!-- localhost -->
-    <off_dest_host>127.0.0.1</off_dest_host>
-    <off_dest_port>27017</off_dest_port>
+    <off_dest_host>localhost</off_dest_host>
+    <off_dest_port>27018</off_dest_port>
     <off_dest_db_name>off_match</off_dest_db_name>
     <off_dest_login></off_dest_login>
     <off_dest_pwd></off_dest_pwd>

@@ -1,5 +1,5 @@
 /*
- * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products
  * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
  * Results are stored in a Mongo-Database.
  *
@@ -11,15 +11,12 @@
 package org.openfoodfacts.preparer;
 
 import org.openfoodfacts.utils.JsonTools;
-import java.io.BufferedReader;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.UUID;
-import org.apache.log4j.FileAppender;
+
 import org.apache.log4j.Logger;
 import org.openfoodfacts.products.IProduct;
 import org.openfoodfacts.utils.CfgMgr;
@@ -28,7 +25,6 @@ import org.openfoodfacts.utils.FileMgr;
 import org.openfoodfacts.utils.Tuple;
 
 /**
- *
  * useful links: :gson: https://github.com/google/gson :gson api:
  * http://www.javadoc.io/doc/com.google.code.gson/gson/2.8.5 :gson sample
  * streaming: https://sites.google.com/site/gson/streaming :log4j:
@@ -65,14 +61,14 @@ public class Main {
         String fname_log = CfgMgr.getConf(CONF_PATH_TO_ROOT).concat("/").concat(CfgMgr.getConf(CONF_PATH_LOGFILE_NAME));
         f_appender.setFile(fname_log);
         */
-        
+
         logger.info("Process Preparer started..");
         logger.info("Log level is " + logger.getParent().getLevel().toString().toUpperCase());
 
-        int nbSecondsSuspension = 300*1000;
+        int nbSecondsSuspension = 300 * 1000;
         String strNbSecondsSuspension = System.getenv("NB_SECONDS_SUSPENSION");
         if (null != strNbSecondsSuspension && !strNbSecondsSuspension.isEmpty()) {
-            nbSecondsSuspension = Integer.parseInt(strNbSecondsSuspension)*1000;
+            nbSecondsSuspension = Integer.parseInt(strNbSecondsSuspension) * 1000;
         }
 
         // get available slots N on server => provide N new files and suspend before looping
@@ -100,14 +96,14 @@ public class Main {
             } catch (RuntimeException rex) {
                 logger.error("Error occurred while reading config file..!");
             }
-            logger.info("..SUSPENDING preparer for "+strNbSecondsSuspension+" seconds..");
-            try{
-            Thread.sleep(nbSecondsSuspension);
+            logger.info("..SUSPENDING preparer for " + strNbSecondsSuspension + " seconds..");
+            try {
+                Thread.sleep(nbSecondsSuspension);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
             logger.info("..STARTS AGAIN preparer..");
-        } while(true);
+        } while (true);
     }
 
     private static String getProgress(String tag) {
@@ -130,13 +126,13 @@ public class Main {
     }
 
     /*
-    * Based on a matrix of products All intersected with Updated, generates nb_files_to_create files with 2 cursors (height and width)
+     * Based on a matrix of products All intersected with Updated, generates nb_files_to_create files with 2 cursors (height and width)
      */
-    private static int prepareNewFiles(int nb_files_to_create) {
+    private static int prepareNewFiles(int nb_files_to_create) throws IOException {
         int nb_files = 0;
         boolean isFinished = false;
         boolean isSomethingWrong = false;
-        
+
         String fullpath_updated_products = CfgMgr.getConf(CONF_PATH_TO_ROOT) + File.separator + CfgMgr.getConf(Main.CONF_PATH_OUT_FEEDERS) + File.separator + CfgMgr.getConf(Main.CONF_OUT_FNAME_UPDATED_PRODUCTS);
         int height = Integer.parseInt(CfgMgr.getConf(Main.CONF_HEIGHT));
         String fullpath_all_products = CfgMgr.getConf(CONF_PATH_TO_ROOT) + File.separator + CfgMgr.getConf(Main.CONF_PATH_OUT_FEEDERS) + File.separator + CfgMgr.getConf(Main.CONF_OUT_FNAME_ALL_PRODUCTS);
@@ -149,45 +145,37 @@ public class Main {
             String last_code_w = getProgress(PROGRESS_LAST_CODE_ALL_PRODUCTS);
             // ..last barcode of UPDATED products processed in previous batch (h=height in Matrix)
             String last_code_h = getProgress(PROGRESS_LAST_CODE_UPDATED_PRODUCTS);
-            
-            Tuple< List<IProduct>, List<IProduct>> cell_matrix = JsonTools.extractOneCellMatrix(last_code_h, last_code_w, fullpath_all_products, width, fullpath_updated_products, height);
-            isSomethingWrong = cell_matrix == null;
-            if (!isSomethingWrong) {
-                int cell_width = cell_matrix.x.size();
-                int cell_height = cell_matrix.y.size();
-                if (cell_width > 0 && cell_height > 0) {
-                    // create h and w files
-                    // ..random name for directory (not important, just for gathering couples {h, w} matrix-data
-                    String uniqueID = UUID.randomUUID().toString();
-                    String out_matrix_dir_for_files = CfgMgr.getConf(CONF_PATH_TO_ROOT) + File.separator + CfgMgr.getConf(CONF_PATH_OUT_PREPARER) + File.separator + uniqueID;
-                    isSomethingWrong = !(FileMgr.mkdir(out_matrix_dir_for_files));
-                    if (!isSomethingWrong) {
-                        JsonTools.writeJsonStream(out_matrix_dir_for_files, "h_products.json", cell_matrix.x);
-                        JsonTools.writeJsonStream(out_matrix_dir_for_files, "w_products.json", cell_matrix.y);
-                        nb_files++;
-                    }
 
-                }
-                if ((cell_width < width || cell_width == 0) && cell_height != 0) {
+            String uniqueID = UUID.randomUUID().toString();
+            String out_matrix_dir_for_files = CfgMgr.getConf(CONF_PATH_TO_ROOT) + File.separator + CfgMgr.getConf(CONF_PATH_OUT_PREPARER) + File.separator + uniqueID;
+            isSomethingWrong = !(FileMgr.mkdir(out_matrix_dir_for_files));
+            if (!isSomethingWrong) {
+                Tuple<Long, Long> cell_matrix_h = JsonTools.extractAndStreamProducts(fullpath_updated_products, last_code_h, height, out_matrix_dir_for_files + File.separator + "h_products.json");
+                Tuple<Long, Long> cell_matrix_w = JsonTools.extractAndStreamProducts(fullpath_all_products, last_code_w, width, out_matrix_dir_for_files + File.separator + "w_products.json");
+                isSomethingWrong = cell_matrix_h == null || cell_matrix_w == null;
+                if (!isSomethingWrong) {
+                    //               if ((cell_matrix_w < width || cell_matrix_w == 0) && cell_matrix_h != 0) {
                     // End of line-X-matrix reached, we start a new block on next line
                     last_code_w = "";
-                    last_code_h = cell_matrix.y.get(cell_matrix.y.size() - 1).getCode();
-                } else if (cell_height == 0) {
+                    //            last_code_h = cell_matrix.y.get(cell_matrix.y.size() - 1).getCode();
+                    //             } else if (cell_matrix_h == 0) {
                     // finished: all cells have been processed and associated files generated
                     isFinished = true;
-                } else {
+                    //           } else {
                     // update of last products processed in h and w dimensions
-                    last_code_w = cell_matrix.x.get(cell_matrix.x.size() - 1).getCode();
-                    last_code_h = cell_matrix.y.get(0).getCode();
+                    //           last_code_w = cell_matrix.x.get(cell_matrix.x.size() - 1).getCode();
+                    //           last_code_h = cell_matrix.y.get(0).getCode();
 
-                }
-                if (!isFinished) {
-                    // save progress
-                    setProgress(PROGRESS_LAST_CODE_ALL_PRODUCTS, last_code_w);
-                    setProgress(PROGRESS_LAST_CODE_UPDATED_PRODUCTS, last_code_h);
+                    //                }
+                    if (!isFinished) {
+                        // save progress
+                        setProgress(PROGRESS_LAST_CODE_ALL_PRODUCTS, last_code_w);
+                        setProgress(PROGRESS_LAST_CODE_UPDATED_PRODUCTS, last_code_h);
+                    }
                 }
             }
-        } while (nb_files < nb_files_to_create && !isFinished && !isSomethingWrong);
+        }
+        while (nb_files < nb_files_to_create && !isFinished && !isSomethingWrong);
         if (isFinished) {
             logger.info("SUCCESS: all Matrix data files have been generated and are ready to be transferred [" + nb_files + " file(s)]");
             // reinit progress

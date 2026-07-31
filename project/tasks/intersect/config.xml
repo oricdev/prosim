@@ -16,7 +16,7 @@
     <!--similarity_min_percentage>60</similarity_min_percentage-->
     <!-- Import modes into Mongo-Db: QUICK_INIT or FULL_CHECK_UPDATE -->
     <mongo_import_mode>QUICK_INIT</mongo_import_mode>
-    <path_to_root>..</path_to_root>
+    <path_to_root>../../../..</path_to_root>
     <path_to_logfile_name>logs/log_intersecter.log</path_to_logfile_name>
     <!-- stop intersect-process when the number of data-packages in incoming directory is equal to this number -->
     <stop_when_min_data_reached>1</stop_when_min_data_reached>

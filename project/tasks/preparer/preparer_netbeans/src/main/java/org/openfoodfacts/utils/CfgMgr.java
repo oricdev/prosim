@@ -1,5 +1,5 @@
 /*
- * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products 
+ * PROSIM (PROduct SIMilarity): backend engine for comparing OpenFoodFacts products
  * by pairs based on their score (Nutrition Score, Nova Classification, etc.).
  * Results are stored in a Mongo-Database.
  *
@@ -23,6 +23,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -45,9 +46,9 @@ public class CfgMgr {
             String xpath_expr = "//" + tag;
 
             tag_value = xpath.evaluate(xpath_expr, xml_file);
-            if (tag_value.equals("")) {
-                logger.info("reading '" + xml_fname + "' file: " + tag + " is empty !!");
-            }
+            //     if (tag_value.equals("")) {
+            //         logger.info("reading '" + xml_fname + "' file: " + tag + " is empty !!");
+            //    }
             //else {
             //    logger.info("reading '" + xml_fname + "' file: " + tag + " => " + tag_value);
             //}
@@ -99,11 +100,11 @@ public class CfgMgr {
     public static void addRootNodeInXml(String xmlfile, String root_tag) {
         // TODO
     }
-    
+
     public static void addChildNodeInXml(String xmlfile, String tag, String a_value) {
         // TODO: prendre le first childroot node et append node with value
     }
-    
+
     public static String getConf(String tag) {
         String path_config = System.getenv("PATH_CONFIG_FILE");
         return readFromXml(path_config, tag);

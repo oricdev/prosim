@@ -271,14 +271,15 @@ public class JsonTools {
         }
     }
 
-    public static Tuple<Long, Long> extractAndStreamProducts(
+    public static Tuple<Long, String> extractAndStreamProducts(
             String inputFilePath, String code, int length, String outputFilePath) throws IOException {
         FileInputStream in = new FileInputStream(inputFilePath);
         FileOutputStream out = new FileOutputStream(outputFilePath);
 
-        boolean isCodeFound = code.equals("");
-        long nb_read = 0;
+        boolean isCodeFound = false;
         long nb_codes_added = 0;
+        // For progression purposes
+        String last_code_read = "";
 
         try (JsonReader reader = new JsonReader(new InputStreamReader(in, StandardCharsets.UTF_8));
              JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))) {
@@ -290,8 +291,12 @@ public class JsonTools {
 
             while (reader.hasNext() && nb_codes_added < length) {
                 Product product = gson.fromJson(reader, Product.class);
+                last_code_read = product.getCode();
+                if (!isCodeFound) {
+                    isCodeFound = code.equals("") || product.getCode().equals(code);
+                }
 
-                if (isCodeFound) {
+                if (isCodeFound && !code.equals(last_code_read)) {
                     // Convertit le produit en JSON et l'écrit dans le writer
                     String json = gson.toJson(product);
                     writer.jsonValue(json);
@@ -299,18 +304,12 @@ public class JsonTools {
                     if (nb_codes_added % 5000 == 0) {
                         logger.info(nb_codes_added + " products written to output file..");
                     }
-                } else {
-                    isCodeFound = product.getCode().equals(code);
-                    // Si le code est trouvé dès le premier produit lu, l'écrire aussi
-                    if (isCodeFound && nb_read == 0) {
-                        String json = gson.toJson(product);
-                        writer.jsonValue(json);
-                        nb_codes_added++;
-                    }
-                    nb_read++;
                 }
             }
 
+            if (nb_codes_added < length) {
+                last_code_read="";
+            }
             writer.endArray(); // Fin du tableau JSON
         } catch (IOException ioe) {
             logger.error("Error processing InputStream or writing OutputStream", ioe);
@@ -318,7 +317,8 @@ public class JsonTools {
         }
 
         // Retourne un tuple avec nb_read et nb_codes_added
-        return (!isCodeFound) ? null : new Tuple<>(nb_read, nb_codes_added);
+        logger.info(nb_codes_added + " products written to output file..");
+        return (!isCodeFound) ? null : new Tuple<>(nb_codes_added, last_code_read);
     }
 
     public static Tuple<List<IProduct>, List<IProduct>> extractOneCellMatrix_old(String code_h, String code_w, String fullpath_all_products, int width, String fullpath_updated_products, int height) {

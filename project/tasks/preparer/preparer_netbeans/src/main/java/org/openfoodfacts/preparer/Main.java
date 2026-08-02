@@ -15,6 +15,7 @@ import org.openfoodfacts.utils.JsonTools;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
@@ -35,17 +36,11 @@ public class Main {
     final static Logger logger = Logger.getLogger(org.openfoodfacts.preparer.Main.class);
     // Tags in config.xml file
     final static String CONF_PATH_TO_ROOT = "path_to_root";
-    final static String CONF_PATH_LOGFILE_NAME = "path_to_logfile_name";
     final static String CONF_MAX_OUTPUT_DATA = "max_output_data";
-    final static String CONF_STATS_HEIGHT = "stats_H_nb_products";
-    final static String CONF_STATS_WIDTH = "stats_W_nb_products";
     final static String CONF_PATH_OUT_PREPARER = "out_path_preparer";
     final static String CONF_PATH_OUT_FEEDERS = "out_path_feeders";
     final static String CONF_OUT_FNAME_ALL_PRODUCTS = "out_all_products";
     final static String CONF_OUT_FNAME_UPDATED_PRODUCTS = "out_updated_products";
-    final static String CONF_OUT_FNAME_STATS = "out_path_stats";
-    final static String CONF_SERVER_PATH = "server_path";
-    final static String CONF_FILEPATH_NB_FREE_SLOTS = "filepath_nb_free_slots";
     final static String CONF_WIDTH = "width";
     final static String CONF_HEIGHT = "height";
     // Tags in progress.xml file
@@ -150,29 +145,17 @@ public class Main {
             String out_matrix_dir_for_files = CfgMgr.getConf(CONF_PATH_TO_ROOT) + File.separator + CfgMgr.getConf(CONF_PATH_OUT_PREPARER) + File.separator + uniqueID;
             isSomethingWrong = !(FileMgr.mkdir(out_matrix_dir_for_files));
             if (!isSomethingWrong) {
-                Tuple<Long, Long> cell_matrix_h = JsonTools.extractAndStreamProducts(fullpath_updated_products, last_code_h, height, out_matrix_dir_for_files + File.separator + "h_products.json");
-                Tuple<Long, Long> cell_matrix_w = JsonTools.extractAndStreamProducts(fullpath_all_products, last_code_w, width, out_matrix_dir_for_files + File.separator + "w_products.json");
+                // Tuple<nb_codes_added, last_code_read>
+                Tuple<Long, String> cell_matrix_h = JsonTools.extractAndStreamProducts(fullpath_updated_products, last_code_h, height, out_matrix_dir_for_files + File.separator + "h_products.json");
+                Tuple<Long, String> cell_matrix_w = JsonTools.extractAndStreamProducts(fullpath_all_products, last_code_w, width, out_matrix_dir_for_files + File.separator + "w_products.json");
                 isSomethingWrong = cell_matrix_h == null || cell_matrix_w == null;
                 if (!isSomethingWrong) {
-                    //               if ((cell_matrix_w < width || cell_matrix_w == 0) && cell_matrix_h != 0) {
-                    // End of line-X-matrix reached, we start a new block on next line
-                    last_code_w = "";
-                    //            last_code_h = cell_matrix.y.get(cell_matrix.y.size() - 1).getCode();
-                    //             } else if (cell_matrix_h == 0) {
-                    // finished: all cells have been processed and associated files generated
-                    isFinished = true;
-                    //           } else {
-                    // update of last products processed in h and w dimensions
-                    //           last_code_w = cell_matrix.x.get(cell_matrix.x.size() - 1).getCode();
-                    //           last_code_h = cell_matrix.y.get(0).getCode();
-
-                    //                }
-                    if (!isFinished) {
-                        // save progress
-                        setProgress(PROGRESS_LAST_CODE_ALL_PRODUCTS, last_code_w);
-                        setProgress(PROGRESS_LAST_CODE_UPDATED_PRODUCTS, last_code_h);
-                    }
+                    // save progress
+                    setProgress(PROGRESS_LAST_CODE_ALL_PRODUCTS, cell_matrix_w.y);
+                    setProgress(PROGRESS_LAST_CODE_UPDATED_PRODUCTS, cell_matrix_h.y);
                 }
+                isFinished = Objects.requireNonNull(cell_matrix_h).y.isEmpty() && Objects.requireNonNull(cell_matrix_w).y.isEmpty();
+                nb_files++;
             }
         }
         while (nb_files < nb_files_to_create && !isFinished && !isSomethingWrong);

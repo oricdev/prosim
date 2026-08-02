@@ -171,9 +171,9 @@ public class Main {
                     logger.error("Process aborted!");
                     break;
                 case 2:
-                    // The biggest file first (read as List) and the second file is the smallest (read as JsonStream)
+                    // file "w_products" first and "h_products" second
                     logger.info("matrix-data files retrieved successfully in '" + dirDataset.getAbsolutePath() + "' (2 files)");
-                    dataset = fileDatasets[0].length() > fileDatasets[1].length() ? new Tuple<>(fileDatasets[0], fileDatasets[1]) : new Tuple<>(fileDatasets[1], fileDatasets[0]);
+                    dataset = fileDatasets[0].getName().startsWith("w_products") ? new Tuple<>(fileDatasets[0], fileDatasets[1]) : new Tuple<>(fileDatasets[1], fileDatasets[0]);
                     break;
                 default:
                     logger.error("Exactly 2 matrix-data files should co-exist in package '" + dirDataset.getAbsolutePath() + "' and " + nb_files + " was/were found!");

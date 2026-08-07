@@ -82,6 +82,7 @@ public class Main {
         float sizeInGB = ((float) dbSize) / 1024 / 1024 / 1024;
         logger.info("Database SIZE is " + sizeInGB + " GB.");
         logger.info("Database holds " + MongoMgr.getCountProducts_Prosim() + " products.");
+        MongoMgr.disconnect();
 
         int nbSecondsSuspension = 300 * 1000;
         String strNbSecondsSuspension = System.getenv("NB_SECONDS_SUSPENSION");
@@ -101,6 +102,8 @@ public class Main {
 
                     Tuple<File, File> dataset = Main.getNextDataPackage(dirDataset);
                     List<IProduct> productsExt = null;
+
+                    Main.dbConnect();
                     try {
                         if (intersectMatrixProducts(dataset)) {
                             //delete Dataset
@@ -125,11 +128,12 @@ public class Main {
                     dbSize = MongoMgr.getDbSize();
                     sizeInGB = ((float) dbSize) / 1024 / 1024 / 1024;
                     logger.info("Database SIZE is " + sizeInGB + " GB.");
+                    MongoMgr.disconnect();
                 }
             } catch (RuntimeException rex) {
                 logger.error("Error occurred while intersecting..!");
+                MongoMgr.disconnect();
             }
-            MongoMgr.disconnect();
 
             logger.info("..SUSPENDING intersecter for " + strNbSecondsSuspension + " seconds..");
             try {
@@ -138,6 +142,7 @@ public class Main {
                 Thread.currentThread().interrupt();
             }
             logger.info("..STARTS AGAIN intersecter..");
+
         } while (sizeInGB < max_dbSize);
 
         if (sizeInGB >= max_dbSize) {
@@ -233,43 +238,54 @@ public class Main {
                 List<IProduct> products_intersected = new ArrayList<>();
                 Product product_B = gson.fromJson(reader, Product.class);
                 ProductExt prodExt_B = new ProductExt(product_B);
-                logger.info("Reading product #"+numProduct+" <"+prodExt_B.getCode()+">");
+                logger.info("");
+                logger.info("READING PRODUCT #" + numProduct + " <" + prodExt_B.getCode() + ">");
 
-                for (int i = 0; i < products_A.size(); i++) {
-                    ProductExt prodExt_A = new ProductExt(products_A.get(i));
+                boolean empty_score_B  = prodExt_B.getScore() == null;
+                stats_empty_score += empty_score_B ? 1 : 0;
+                stats_empty_nutriments += (null == prodExt_B.getCategories_tags() || prodExt_B.getCategories_tags().isEmpty()) ? 1 : 0;
 
-                    if (!prodExt_A.getCode().equals(prodExt_B.getCode())) {
-                        // non-exclusive statistics ( a product may have nor nutrition code neither nutriments)
-                        stats_empty_score += prodExt_A.getScore() == null ? 1 : 0;
-                        stats_empty_score += prodExt_B.getScore() == null ? 1 : 0;
-                        stats_empty_nutriments += (null == prodExt_A.getCategories_tags() || prodExt_A.getCategories_tags().isEmpty()) ? 1 : 0;
-                        stats_empty_nutriments += (null == prodExt_B.getCategories_tags() || prodExt_B.getCategories_tags().isEmpty()) ? 1 : 0;
+                if (empty_score_B) {
+                    logger.info("--> NO SCORE => ..ignored!");
+                } else {
+                    for (int i = 0; i < products_A.size(); i++) {
+                        ProductExt prodExt_A = new ProductExt(products_A.get(i));
 
-                        if (prodExt_A.getScore() != null
-                                && prodExt_B.getScore() != null) {
-                         //   prodExt_A.computeSimilarity(prodExt_B);
-                            prodExt_B.computeSimilarity(prodExt_A);
+                        if (!prodExt_A.getCode().equals(prodExt_B.getCode())) {
+                            // non-exclusive statistics ( a product may have nor nutrition code neither nutriments)
+                            stats_empty_score += prodExt_A.getScore() == null ? 1 : 0;
+                            stats_empty_nutriments += (null == prodExt_A.getCategories_tags() || prodExt_A.getCategories_tags().isEmpty()) ? 1 : 0;
 
-                            if (prodExt_B.getSimilarity_with_product() >= min_percentage) {
-                                products_intersected.add(new ProductExt(prodExt_B));
-                                stats_nb_valid_intersects++;
+                            if (prodExt_A.getScore() != null
+                                    && prodExt_B.getScore() != null) {
+                                //   prodExt_A.computeSimilarity(prodExt_B);
+                                prodExt_B.computeSimilarity(prodExt_A);
+
+                                if (prodExt_B.getSimilarity_with_product() >= min_percentage) {
+                                    products_intersected.add(new ProductExt(prodExt_B));
+                                    stats_nb_valid_intersects++;
+                                } else {
+                                    stats_below_min_percentage++;
+                                    stats_nb_ignored++;
+                                }
                             } else {
-                                stats_below_min_percentage++;
                                 stats_nb_ignored++;
                             }
-                        } else {
-                            stats_nb_ignored++;
                         }
+                        stats_nb_intersects++;
+                        // TODO: ICI // output statistics pour la sonce raspberry tous les 1 million d'intersections
                     }
-                    stats_nb_intersects++;
-                    // TODO: ICI // output statistics pour la sonce raspberry tous les 1 million d'intersections
-                }
-                feedDb(products_intersected);
+                    feedDb(products_intersected);
 
-                numProduct++;
+                    numProduct++;
+                }
             }
             reader.endArray();
         }
+
+        istr_A = null;
+        products_A.clear();
+        products_A = null;
 
         logger.info("*********************************************************");
         logger.info("RESULTS OF INTERSECTIONS:");
@@ -322,7 +338,7 @@ public class Main {
             productsAggregator.aggregate(prosim);
         }
 
-        MongoMgr.connect(mongo_host, mongo_port, mongo_login, mongo_pwd, mongo_db, mongo_mode, true);
+  //      MongoMgr.connect(mongo_host, mongo_port, mongo_login, mongo_pwd, mongo_db, mongo_mode, true);
         //logger.info("After REDUCTION, " + productsAggregator.products.keySet().size() + " products will be inserted/merged in the Mongo-Db.");
         //logger.info("BEFORE insertion/merge: db <" + mongo_db + "> holds " + MongoMgr.getCountProducts_Prosim() + " products already.");
         // Aggregate once again with entries found in Mongo-Db (merge of similarity fields)
@@ -345,6 +361,6 @@ public class Main {
             // free some space!
             productsAggregator.products.put(code_product, null);
         });
-        MongoMgr.disconnect();
+   //     MongoMgr.disconnect();
     }
 }

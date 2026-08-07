@@ -63,9 +63,10 @@ public class MongoMgr {
         } else {
             MongoMgr.importMode = EnumMongoImportMode.valueOf(mode);
         }
-        logger.info("****************************************************");
+    /*    logger.info("****************************************************");
         logger.info("Mongo Import Mode has been set to <" + mode + ">");
         logger.info("****************************************************");
+        */
         MongoMgr.host = host;
         MongoMgr.port = port;
         MongoMgr.login = login;

@@ -13,10 +13,16 @@ package org.openfoodfacts.intersect;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import org.apache.log4j.Logger;
 import org.openfoodfacts.aggregator.ProductAggregator;
 import org.openfoodfacts.computers.ProductComputer;
@@ -73,9 +79,9 @@ public class Main {
         Main.dbConnect();
         Float max_dbSize = Float.valueOf(ProductComputer.getDbMaxSize());
         double dbSize = MongoMgr.getDbSize();
-        Main.disconnect();
         float sizeInGB = ((float) dbSize) / 1024 / 1024 / 1024;
         logger.info("Database SIZE is " + sizeInGB + " GB.");
+        logger.info("Database holds " + MongoMgr.getCountProducts_Prosim() + " products.");
 
         int nbSecondsSuspension = 300 * 1000;
         String strNbSecondsSuspension = System.getenv("NB_SECONDS_SUSPENSION");
@@ -85,48 +91,41 @@ public class Main {
 
         do {
             try {
-            File dirDataset = Main.getPathNextDataSet(Integer.valueOf(CfgMgr.getConf(CONF_STOP_WHEN_MIN_DATA_REACHED)));
-            //while (dirDataset != null && sizeInGB < max_dbSize) {
-            while (sizeInGB < max_dbSize && dirDataset != null) {
-                // TODO: ICI // statistics pour sonde : remettre à 0 les 2 progression
+                File dirDataset = Main.getPathNextDataSet(Integer.valueOf(CfgMgr.getConf(CONF_STOP_WHEN_MIN_DATA_REACHED)));
+                //while (dirDataset != null && sizeInGB < max_dbSize) {
+                while (sizeInGB < max_dbSize && dirDataset != null) {
+                    // TODO: ICI // statistics pour sonde : remettre à 0 les 2 progression
 
-                // Erroneous dataset to be moved so that they are not processed anymore
-                String errorsDir = dirDataset.getAbsolutePath() + "/../../errors";
+                    // Erroneous dataset to be moved so that they are not processed anymore
+                    String errorsDir = dirDataset.getAbsolutePath() + "/../../errors";
 
-                Tuple<File, File> dataset = Main.getNextDataPackage(dirDataset);
-                List<IProduct> productsExt = null;
-                try {
-                    productsExt = intersectMatrixProducts(dataset);
+                    Tuple<File, File> dataset = Main.getNextDataPackage(dirDataset);
+                    List<IProduct> productsExt = null;
+                    try {
+                        if (intersectMatrixProducts(dataset)) {
+                            //delete Dataset
+                            FileMgr.deleteDataset(dirDataset);
+                        }
+                    } catch (IllegalStateException | MalformedJsonException jse) {
+                        // Seems that depending on version of JSonReader, such an exception may occurr in certain sub-matric JSON files : <Expected BEGIN_ARRAY but was STRING at line 1>
+                        // Call of sequence:
+                        // Main:intersectMatrixProducts -> JsonTools:readJsonStream -> JsonReader.beginArray
+                        //
+                        // In this case, move directory so that it is not processed anymore and proceed with next-one
+                        logger.error("Dataset is possibly mal-formed <" + dirDataset.getAbsolutePath() + ">.");
+                        logger.error("This dataset is being moved to the 'errors' directory!");
+                        logger.error(jse.getMessage());
+                        FileMgr.moveDir(errorsDir, dirDataset);
+                    }
+                    // proceed with next file
+                    logger.info("*****************");
+                    logger.info("retrieving next data set..");
+                    dirDataset = Main.getPathNextDataSet(Integer.valueOf(CfgMgr.getConf(CONF_STOP_WHEN_MIN_DATA_REACHED)));
 
-                    logger.info(productsExt.size() + " product-intersections are about to be exported in the Mongo-database..");
-                    //saveResults(productsExt, dirDataset.getName());
-                    feedDb(productsExt);
-                    //backup package
-                    //FileMgr.backup(CfgMgr.getConf(CONF_PATH_TO_ROOT).concat("/").concat(CfgMgr.getConf(CONF_BACKUP_DIRNAME)), dirDataset);
-                    //delete Dataset
-                    FileMgr.deleteDataset(dirDataset);
-                } catch (IllegalStateException | MalformedJsonException jse) {
-                    // Seems that depending on version of JSonReader, such an exception may occurr in certain sub-matric JSON files : <Expected BEGIN_ARRAY but was STRING at line 1>
-                    // Call of sequence:
-                    // Main:intersectMatrixProducts -> JsonTools:readJsonStream -> JsonReader.beginArray
-                    //
-                    // In this case, move directory so that it is not processed anymore and proceed with next-one
-                    logger.error("Dataset is possibly mal-formed <" + dirDataset.getAbsolutePath() + ">.");
-                    logger.error("This dataset is being moved to the 'errors' directory!");
-                    logger.error(jse.getMessage());
-                    FileMgr.moveDir(errorsDir, dirDataset);
+                    dbSize = MongoMgr.getDbSize();
+                    sizeInGB = ((float) dbSize) / 1024 / 1024 / 1024;
+                    logger.info("Database SIZE is " + sizeInGB + " GB.");
                 }
-                // proceed with next file
-                logger.info("*****************");
-                logger.info("retrieving next data set..");
-                dirDataset = Main.getPathNextDataSet(Integer.valueOf(CfgMgr.getConf(CONF_STOP_WHEN_MIN_DATA_REACHED)));
-
-                Main.dbConnect();
-                dbSize = MongoMgr.getDbSize();
-                Main.disconnect();
-                sizeInGB = ((float) dbSize) / 1024 / 1024 / 1024;
-                logger.info("Database SIZE is " + sizeInGB + " GB.");
-            }
             } catch (RuntimeException rex) {
                 logger.error("Error occurred while intersecting..!");
             }
@@ -172,8 +171,9 @@ public class Main {
                     logger.error("Process aborted!");
                     break;
                 case 2:
+                    // file "w_products" first and "h_products" second
                     logger.info("matrix-data files retrieved successfully in '" + dirDataset.getAbsolutePath() + "' (2 files)");
-                    dataset = new Tuple<>(fileDatasets[0], fileDatasets[1]);
+                    dataset = fileDatasets[0].getName().startsWith("w_products") ? new Tuple<>(fileDatasets[0], fileDatasets[1]) : new Tuple<>(fileDatasets[1], fileDatasets[0]);
                     break;
                 default:
                     logger.error("Exactly 2 matrix-data files should co-exist in package '" + dirDataset.getAbsolutePath() + "' and " + nb_files + " was/were found!");
@@ -207,8 +207,7 @@ public class Main {
         JsonTools.writeJsonStream(result_full_path, "intersected_products.json", products);
     }
 
-    private static List<IProduct> intersectMatrixProducts(Tuple<File, File> dataset) throws Exception {
-        List<IProduct> products_intersected = new ArrayList<>();
+    private static boolean intersectMatrixProducts(Tuple<File, File> dataset) throws Exception {
         short min_percentage = Short.valueOf(ProductComputer.getSimilarityMinPercentage());
         logger.info("starting intersecting (min. percentage is " + min_percentage + "%)");
         // statistics
@@ -219,48 +218,57 @@ public class Main {
         long stats_below_min_percentage = 0;
         long stats_nb_ignored = 0;
 
-        // reading of the matrix
+        // Lire toute la ligne A (width) => biggest file
         FileInputStream istr_A = new FileInputStream(dataset.x.getAbsolutePath());
-        FileInputStream istr_B = new FileInputStream(dataset.y.getAbsolutePath());
         List<Product> products_A = JsonTools.readJsonStream(istr_A);
-        List<Product> products_B = JsonTools.readJsonStream(istr_B);
 
-        for (int i = 0; i < products_A.size(); i++) {
-            for (int j = 0; j < products_B.size(); j++) {
-                ProductExt prodExt_A = new ProductExt(products_A.get(i));
-                ProductExt prodExt_B = new ProductExt(products_B.get(j));
-                if (!prodExt_A.getCode().equals(prodExt_B.getCode())) {
-                    // non-exclusive statistics ( a product may have nor nutrition code neither nutriments)
-                    stats_empty_score += prodExt_A.getScore() == null ? 1 : 0;
-                    stats_empty_score += prodExt_B.getScore() == null ? 1 : 0;
-                    stats_empty_nutriments += (null == prodExt_A.getCategories_tags() || prodExt_A.getCategories_tags().isEmpty()) ? 1 : 0;
-                    stats_empty_nutriments += (null == prodExt_B.getCategories_tags() || prodExt_B.getCategories_tags().isEmpty()) ? 1 : 0;
 
-                    if (prodExt_A.getScore() != null
-                            && prodExt_B.getScore() != null) {
-                        prodExt_A.computeSimilarity(prodExt_B);
-                        prodExt_B.computeSimilarity(prodExt_A);
-                        if (prodExt_A.getSimilarity_with_product() >= min_percentage) {
-                            products_intersected.add(prodExt_A);
-                            stats_nb_valid_intersects++;
+        // Lire chaque produit B (shortest file) un-à-un et calculer les similarités avec toute la ligne A
+        try (JsonReader reader = new JsonReader(new InputStreamReader(Files.newInputStream(Paths.get(dataset.y.getAbsolutePath())), StandardCharsets.UTF_8))) {
+            reader.beginArray();
+            Gson gson = new Gson();
+            long numProduct = 1L;
+
+            while (reader.hasNext()) {
+                List<IProduct> products_intersected = new ArrayList<>();
+                Product product_B = gson.fromJson(reader, Product.class);
+                ProductExt prodExt_B = new ProductExt(product_B);
+                logger.info("Reading product #"+numProduct+" <"+prodExt_B.getCode()+">");
+
+                for (int i = 0; i < products_A.size(); i++) {
+                    ProductExt prodExt_A = new ProductExt(products_A.get(i));
+
+                    if (!prodExt_A.getCode().equals(prodExt_B.getCode())) {
+                        // non-exclusive statistics ( a product may have nor nutrition code neither nutriments)
+                        stats_empty_score += prodExt_A.getScore() == null ? 1 : 0;
+                        stats_empty_score += prodExt_B.getScore() == null ? 1 : 0;
+                        stats_empty_nutriments += (null == prodExt_A.getCategories_tags() || prodExt_A.getCategories_tags().isEmpty()) ? 1 : 0;
+                        stats_empty_nutriments += (null == prodExt_B.getCategories_tags() || prodExt_B.getCategories_tags().isEmpty()) ? 1 : 0;
+
+                        if (prodExt_A.getScore() != null
+                                && prodExt_B.getScore() != null) {
+                         //   prodExt_A.computeSimilarity(prodExt_B);
+                            prodExt_B.computeSimilarity(prodExt_A);
+
+                            if (prodExt_B.getSimilarity_with_product() >= min_percentage) {
+                                products_intersected.add(new ProductExt(prodExt_B));
+                                stats_nb_valid_intersects++;
+                            } else {
+                                stats_below_min_percentage++;
+                                stats_nb_ignored++;
+                            }
                         } else {
-                            stats_below_min_percentage++;
                             stats_nb_ignored++;
                         }
-                        if (prodExt_B.getSimilarity_with_product() >= min_percentage) {
-                            products_intersected.add(prodExt_B);
-                            stats_nb_valid_intersects++;
-                        } else {
-                            stats_below_min_percentage++;
-                            stats_nb_ignored++;
-                        }
-                    } else {
-                        stats_nb_ignored++;
                     }
+                    stats_nb_intersects++;
+                    // TODO: ICI // output statistics pour la sonce raspberry tous les 1 million d'intersections
                 }
-                stats_nb_intersects++;
-                // TODO: ICI // output statistics pour la sonce raspberry tous les 1 million d'intersections
+                feedDb(products_intersected);
+
+                numProduct++;
             }
+            reader.endArray();
         }
 
         logger.info("*********************************************************");
@@ -272,7 +280,7 @@ public class Main {
         logger.info("    products with NO score: " + (new DecimalFormat("###,###")).format(stats_empty_score));
         logger.info("    products with NO categories:      " + (new DecimalFormat("###,###")).format(stats_empty_nutriments));
         logger.info("*********************************************************");
-        return products_intersected;
+        return true;
     }
 
     private static void dbConnect() throws Exception {
@@ -315,8 +323,8 @@ public class Main {
         }
 
         MongoMgr.connect(mongo_host, mongo_port, mongo_login, mongo_pwd, mongo_db, mongo_mode, true);
-        logger.info("After REDUCTION, " + productsAggregator.products.keySet().size() + " products will be inserted/merged in the Mongo-Db.");
-        logger.info("BEFORE insertion/merge: db <" + mongo_db + "> holds " + MongoMgr.getCountProducts_Prosim() + " products already.");
+        //logger.info("After REDUCTION, " + productsAggregator.products.keySet().size() + " products will be inserted/merged in the Mongo-Db.");
+        //logger.info("BEFORE insertion/merge: db <" + mongo_db + "> holds " + MongoMgr.getCountProducts_Prosim() + " products already.");
         // Aggregate once again with entries found in Mongo-Db (merge of similarity fields)
 
         // TODO: ICI // try to output statistics pour la sonde!!
@@ -337,7 +345,6 @@ public class Main {
             // free some space!
             productsAggregator.products.put(code_product, null);
         });
-        logger.info("AFTER insertion/merge: db <" + mongo_db + "> holds " + MongoMgr.getCountProducts_Prosim() + " products.");
         MongoMgr.disconnect();
     }
 }

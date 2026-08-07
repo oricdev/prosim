@@ -10,11 +10,12 @@
  */
 package org.openfoodfacts.products;
 
+import java.io.Serializable;
 import java.util.List;
 import org.openfoodfacts.computers.ProductComputer;
 
 
-public class ProductExt extends Product implements IProduct {
+public class ProductExt extends Product implements IProduct, Serializable {
 
     protected final static int VOID_SIMILARITY = -1;
 
@@ -25,6 +26,15 @@ public class ProductExt extends Product implements IProduct {
 
     public ProductExt(Product product) throws Exception {
         super(product.getId(), product.getCode(), product.getProduct_name(), product.getPnns_groups_1(), product.getCountries_tags(), product.getCategories_tags(), product.getIngredients_tags(), product.getBrands_tags(), product.getStores_tags(), product.getLanguages_codes(), product.getNutriments(), product.getNova_group(), product.getImages(), product.getNutritionGrades());
+        //this.computeScore();
+    }
+
+    public ProductExt(ProductExt productExt) throws Exception {
+        super(productExt.getId(), productExt.getCode(), productExt.getProduct_name(), productExt.getPnns_groups_1(), productExt.getCountries_tags(), productExt.getCategories_tags(), productExt.getIngredients_tags(), productExt.getBrands_tags(), productExt.getStores_tags(), productExt.getLanguages_codes(), productExt.getNutriments(), productExt.getNova_group(), productExt.getImages(), productExt.getNutritionGrades());
+        this.score = productExt.score;
+        this.similarity_with_product = productExt.similarity_with_product;
+        this.other_code=productExt.other_code;
+        this.other_score=productExt.other_score;
         //this.computeScore();
     }
 

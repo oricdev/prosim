@@ -47,6 +47,7 @@ public class ProductAggregator {
         if (null != strMaxMatchBelow100 && !strMaxMatchBelow100.isEmpty()) {
             this.maxMatchBelow100 = Integer.parseInt(strMaxMatchBelow100);
         }
+        products = new HashMap<>();
     }
 
     public boolean aggregate(Prosim other_prosim) {

@@ -11,7 +11,7 @@
  * -->
 <!-- mode = host | path wether accessing remote Boinc server (server_host) or local directory (server_path) -->
 <config mode="path">
-    <path_to_root>..</path_to_root>
+    <path_to_root>../../../../..</path_to_root>
     <path_to_logfile_name>logs/log_preparer.log</path_to_logfile_name>
     <!-- Max number of data packages allowed in the output directory. If less, then the preparer task is allowed to produce new data packages/work-units -->
     <max_output_data>2</max_output_data>
@@ -29,10 +29,10 @@
     <filepath_nb_free_slots>shared/nb_free_slots.txt</filepath_nb_free_slots> -->
     
     <!-- width and height of products' matrix in a single new work unit file (to be transferred for processing on remote/local server) -->
-    <width>5000</width>
-    <height>3000</height>
+    <width>1000000</width>
+    <height>2</height>
         <!-- Statistics purposes: number of products in width and height to import in Mongo db -->
     <!-- Helps maintaining statistics on overall progression (check logs) -->
-    <stats_H_nb_products>806780</stats_H_nb_products>
-    <stats_W_nb_products>806780</stats_W_nb_products>
+    <stats_H_nb_products>185000</stats_H_nb_products>
+    <stats_W_nb_products>185000</stats_W_nb_products>
 </config>

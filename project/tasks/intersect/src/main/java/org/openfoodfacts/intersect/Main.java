@@ -241,7 +241,7 @@ public class Main {
                 logger.info("");
                 logger.info("READING PRODUCT #" + numProduct + " <" + prodExt_B.getCode() + ">");
 
-                boolean empty_score_B  = prodExt_B.getScore() == null;
+                boolean empty_score_B = prodExt_B.getScore() == null;
                 stats_empty_score += empty_score_B ? 1 : 0;
                 stats_empty_nutriments += (null == prodExt_B.getCategories_tags() || prodExt_B.getCategories_tags().isEmpty()) ? 1 : 0;
 
@@ -272,13 +272,13 @@ public class Main {
                                 stats_nb_ignored++;
                             }
                         }
+                        prodExt_A = null;
                         stats_nb_intersects++;
                         // TODO: ICI // output statistics pour la sonce raspberry tous les 1 million d'intersections
                     }
                     feedDb(products_intersected);
-
-                    numProduct++;
                 }
+                numProduct++;
             }
             reader.endArray();
         }
@@ -286,6 +286,8 @@ public class Main {
         istr_A = null;
         products_A.clear();
         products_A = null;
+        // Force l'appel au Garbbage Collector
+        System.gc();
 
         logger.info("*********************************************************");
         logger.info("RESULTS OF INTERSECTIONS:");
@@ -338,7 +340,7 @@ public class Main {
             productsAggregator.aggregate(prosim);
         }
 
-  //      MongoMgr.connect(mongo_host, mongo_port, mongo_login, mongo_pwd, mongo_db, mongo_mode, true);
+        //      MongoMgr.connect(mongo_host, mongo_port, mongo_login, mongo_pwd, mongo_db, mongo_mode, true);
         //logger.info("After REDUCTION, " + productsAggregator.products.keySet().size() + " products will be inserted/merged in the Mongo-Db.");
         //logger.info("BEFORE insertion/merge: db <" + mongo_db + "> holds " + MongoMgr.getCountProducts_Prosim() + " products already.");
         // Aggregate once again with entries found in Mongo-Db (merge of similarity fields)
@@ -361,6 +363,6 @@ public class Main {
             // free some space!
             productsAggregator.products.put(code_product, null);
         });
-   //     MongoMgr.disconnect();
+        //     MongoMgr.disconnect();
     }
 }
